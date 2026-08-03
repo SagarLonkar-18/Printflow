@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: printflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: printflow
+      POSTGRES_PASSWORD: printflow_dev
+      POSTGRES_DB: printflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - printflow_pg_data:/var/lib/postgresql/data
+
+volumes:
+  printflow_pg_data:

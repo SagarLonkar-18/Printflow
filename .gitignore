@@ -33,3 +33,6 @@ lerna-debug.log*
 
 # Vite
 *.local
+
+# Claude
+.claude/
