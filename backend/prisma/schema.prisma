@@ -17,4 +17,16 @@ model Shop {
   name      String
   slug      String   @unique
   createdAt DateTime @default(now())
+  orders    Order[]  // <- "a shop has many orders" (this line creates no column, it's just for the Prisma Client's convenience)
+}
+
+model Order {
+  id           String   @id @default(cuid())
+  shopId       String
+  shop         Shop     @relation(fields: [shopId], references: [id])
+  originalName String
+  copies       Int      @default(1)
+  colorMode    String   @default("BW") // will become a real enum shortly
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
 }
