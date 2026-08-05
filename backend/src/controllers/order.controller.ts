@@ -9,7 +9,7 @@ const createOrderSchema = z.object({
 });
 
 export async function createOrder(req: Request, res: Response) {
-	const { slug } = req.params;
+	const { slug } = req.params as { slug: string };
 
 	const parsed = createOrderSchema.safeParse(req.body);
 	if (!parsed.success) {
@@ -33,4 +33,20 @@ export async function createOrder(req: Request, res: Response) {
 	});
 
 	return res.status(201).json(order);
+}
+
+export async function listOrdersForShop(req: Request, res: Response) {
+	const { slug } = req.params as { slug: string };
+
+	const shop = await prisma.shop.findUnique({ where: { slug } });
+	if (!shop) {
+		return res.status(404).json({ error: "Shop not found" });
+	}
+
+	const orders = await prisma.order.findMany({
+		where: { shopId: shop.id },
+		orderBy: { createdAt: "desc" },
+	});
+
+	return res.json(orders);
 }
