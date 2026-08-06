@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 
 export async function getShopBySlug(req: Request, res: Response) {
-	const { slug } = req.params;
+	const { slug }  = req.params;
 
 	const shop = await prisma.shop.findUnique({
 		where: { slug },
