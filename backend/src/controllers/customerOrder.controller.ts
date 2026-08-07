@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { emitNewOrder } from "../lib/socket.js";
 
 const createOrderSchema = z.object({
 	originalName: z.string().min(1),
@@ -31,6 +32,8 @@ export async function createOrder(req: Request, res: Response) {
 			colorMode: parsed.data.colorMode,
 		},
 	});
+
+	emitNewOrder(shop.id, order);
 
 	return res.status(201).json(order);
 }
