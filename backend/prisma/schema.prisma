@@ -26,6 +26,7 @@ model Order {
   id           String   @id @default(cuid())
   shopId       String
   shop         Shop     @relation(fields: [shopId], references: [id])
+  fileKey      String
   originalName String
   copies       Int      @default(1)
   colorMode    String   @default("BW") // will become a real enum shortly
