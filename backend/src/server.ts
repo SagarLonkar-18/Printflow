@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import { shopRouter } from "./routes/shop.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
@@ -7,6 +8,8 @@ import { meRouter } from "./routes/me.routes.js";
 import { initSocket } from "./lib/socket.js";
 
 const app = express();
+
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
