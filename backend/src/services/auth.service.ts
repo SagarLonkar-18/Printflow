@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
+import { randomBytes } from "crypto";
 
 export async function login(email: string, password: string) {
 	const user = await prisma.user.findUnique({
@@ -29,24 +30,41 @@ export async function login(email: string, password: string) {
 	};
 }
 
+function slugify(name: string): string {
+	return name
+		.toLowerCase()
+		.trim()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "");
+}
+
+async function generateUniqueSlug(shopName: string): Promise<string> {
+	const base = slugify(shopName);
+	let slug = base;
+	let attempt = 0;
+
+	while (await prisma.shop.findUnique({ where: { slug } })) {
+		attempt++;
+		// After a few collisions, stop trying "nice" variants and just append randomness
+		const suffix =
+			attempt <= 2 ? String(attempt + 1) : randomBytes(2).toString("hex");
+		slug = `${base}-${suffix}`;
+	}
+
+	return slug;
+}
+
 export async function signup(
 	email: string,
 	password: string,
 	shopName: string,
-	shopSlug: string,
 ) {
 	const existingUser = await prisma.user.findUnique({ where: { email } });
 	if (existingUser) {
 		throw new Error("EMAIL_TAKEN");
 	}
 
-	const existingSlug = await prisma.shop.findUnique({
-		where: { slug: shopSlug },
-	});
-	if (existingSlug) {
-		throw new Error("SLUG_TAKEN");
-	}
-
+	const shopSlug = await generateUniqueSlug(shopName);
 	const passwordHash = await bcrypt.hash(password, 10);
 
 	const user = await prisma.user.create({

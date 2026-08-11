@@ -11,7 +11,6 @@ export default function SignupPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [shopName, setShopName] = useState("");
-	const [shopSlug, setShopSlug] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
@@ -25,7 +24,6 @@ export default function SignupPage() {
 				email,
 				password,
 				shopName,
-				shopSlug,
 			});
 			setAuth(res.data.token, res.data.user);
 			navigate("/dashboard");
@@ -84,22 +82,6 @@ export default function SignupPage() {
 							className="w-full p-3 bg-white border border-[#E5E2D9] rounded-xl text-sm font-sans-clean"
 							value={shopName}
 							onChange={(e) => setShopName(e.target.value)}
-							required
-						/>
-					</div>
-					<div>
-						<label className="block text-xs font-mono-code text-gray-600 mb-1 uppercase">
-							Shop URL Slug
-						</label>
-						<input
-							type="text"
-							placeholder="gupta-xerox"
-							className="w-full p-3 bg-white border border-[#E5E2D9] rounded-xl text-sm font-sans-clean"
-							value={shopSlug}
-							onChange={(e) =>
-								setShopSlug(e.target.value.toLowerCase())
-							}
-							pattern="[a-z0-9-]+"
 							required
 						/>
 					</div>
