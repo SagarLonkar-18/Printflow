@@ -5,6 +5,7 @@ import { useAuthStore } from "../store/auth.store";
 import Navbar from "../components/Navbar";
 import OrderCard from "../components/OrderCard";
 import StatusTabs from "../components/StatusTabs";
+import ShopQRCode from "../components/ShopQRCode";
 
 interface Order {
 	id: string;
@@ -21,6 +22,13 @@ export default function DashboardPage() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState("all");
+	const [shop, setShop] = useState<{ name: string; slug: string } | null>(
+		null,
+	);
+
+	useEffect(() => {
+		api.get("/me/shop").then((res) => setShop(res.data));
+	}, []);
 
 	useEffect(() => {
 		api.get("/me/orders")
@@ -107,6 +115,8 @@ export default function DashboardPage() {
 			/>
 
 			<Navbar />
+
+			{shop && <ShopQRCode shopName={shop.name} shopSlug={shop.slug} className="mb-8" />}
 
 			<div className="max-w-5xl mx-auto px-6 py-10">
 				<div className="mb-8">
