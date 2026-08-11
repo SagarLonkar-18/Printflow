@@ -1,5 +1,6 @@
 import { scopedOrders } from "../lib/scopedOrders.js";
 import type { Request, Response } from "express";
+import { createPresignedDownload } from "../services/s3.service.js";
 import { z } from "zod";
 
 const updateStatusSchema = z.object({
@@ -62,4 +63,21 @@ export async function updateOrderStatus(req: Request, res: Response) {
 	}
 
 	return res.json(updated);
+}
+
+export async function getOrderDownloadUrl(req: Request, res: Response) {
+	const shopId = req.auth!.shopId;
+	if (!shopId) {
+		return res.status(403).json({ error: "No shop associated with this account" });
+	}
+
+	const { orderId } = req.params as { orderId: string };
+	const order = await scopedOrders(shopId).findOne(orderId);
+
+	if (!order) {
+		return res.status(404).json({ error: "Order not found" });
+	}
+
+	const downloadUrl = await createPresignedDownload(order.fileKey);
+	return res.json({ downloadUrl });
 }

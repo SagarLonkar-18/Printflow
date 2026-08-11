@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 
@@ -32,4 +32,12 @@ export async function createPresignedUpload(
 	const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes to complete the upload
 
 	return { uploadUrl, key };
+}
+
+export async function createPresignedDownload(fileKey: string) {
+	const command = new GetObjectCommand({
+		Bucket: process.env.S3_BUCKET_NAME!,
+		Key: fileKey,
+	});
+	return getSignedUrl(s3, command, { expiresIn: 300 });
 }

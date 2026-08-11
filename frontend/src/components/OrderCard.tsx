@@ -10,11 +10,11 @@ interface Order {
 
 interface OrderCardProps {
 	order: Order;
-	onMarkPrinting: (id: string) => void;
+	onPrint: (id: string) => void;
 	onMarkCompleted: (id: string) => void;
 }
 
-export default function OrderCard({ order, onMarkPrinting, onMarkCompleted }: OrderCardProps) {
+export default function OrderCard({ order, onPrint, onMarkCompleted }: OrderCardProps) {
 	return (
 		<div
 			className={`bg-white p-5 rounded-2xl border transition shadow-sm ${
@@ -49,7 +49,7 @@ export default function OrderCard({ order, onMarkPrinting, onMarkCompleted }: Or
 
 					{order.status === "PENDING" && (
 						<button
-							onClick={() => onMarkPrinting(order.id)}
+							onClick={() => onPrint(order.id)}
 							className="px-3.5 py-2 bg-[#1A1A1A] hover:bg-black text-white font-semibold rounded-lg transition shadow text-xs"
 						>
 							Start Printing
