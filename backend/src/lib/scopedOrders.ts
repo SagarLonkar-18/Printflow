@@ -11,11 +11,13 @@ export function scopedOrders(shopId: string) {
 			prisma.order.findMany({
 				where: { shopId },
 				orderBy: { createdAt: "desc" },
+				include: { files: true },
 			}),
 
 		findOne: async (orderId: string) => {
 			const order = await prisma.order.findUnique({
 				where: { id: orderId },
+				include: { files: true },
 			});
 
 			// Not just "where shopId" in the query - an EXPLICIT check.
@@ -28,17 +30,25 @@ export function scopedOrders(shopId: string) {
 			return order;
 		},
 
-		updateStatus: async (orderId: string, status: string) => {
-			const existing = await prisma.order.findUnique({
-				where: { id: orderId },
+		// New: scoped lookup for a single FILE, not the whole order.
+		// Print/status-update actions now happen per-file, so this is the
+		// actual unit of tenant-isolated ownership-checking going forward.
+		findFile: async (fileId: string) => {
+			const file = await prisma.orderFile.findUnique({
+				where: { id: fileId },
+				include: { order: true },
 			});
-			if (!existing || existing.shopId !== shopId) {
-				return null;
-			}
-			return prisma.order.update({
-				where: { id: orderId },
-				data: { status },
+			if (!file || file.order.shopId !== shopId) return null;
+			return file;
+		},
+
+		updateFileStatus: async (fileId: string, status: string) => {
+			const file = await prisma.orderFile.findUnique({
+				where: { id: fileId },
+				include: { order: true },
 			});
+			if (!file || file.order.shopId !== shopId) return null;
+			return prisma.orderFile.update({ where: { id: fileId }, data: { status } });
 		},
 	};
 }

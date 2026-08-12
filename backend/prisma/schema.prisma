@@ -23,13 +23,21 @@ model Shop {
 }
 
 model Order {
+  id        String      @id @default(cuid())
+  shopId    String
+  shop      Shop        @relation(fields: [shopId], references: [id])
+  files     OrderFile[]
+  createdAt DateTime    @default(now())
+}
+
+model OrderFile {
   id           String   @id @default(cuid())
-  shopId       String
-  shop         Shop     @relation(fields: [shopId], references: [id])
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
   fileKey      String
   originalName String
   copies       Int      @default(1)
-  colorMode    String   @default("BW") // will become a real enum shortly
+  colorMode    String   @default("BW")
   status       String   @default("PENDING")
   createdAt    DateTime @default(now())
 }

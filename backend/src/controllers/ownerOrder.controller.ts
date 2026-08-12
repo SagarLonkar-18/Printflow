@@ -37,47 +37,40 @@ export async function getMyOrder(req: Request, res: Response) {
 	return res.json(order);
 }
 
-export async function updateOrderStatus(req: Request, res: Response) {
-	const shopId = req.auth!.shopId;
-	if (!shopId) {
-		return res
-			.status(403)
-			.json({ error: "No shop associated with this account" });
-	}
-
-	const parsed = updateStatusSchema.safeParse(req.body);
-	if (!parsed.success) {
-		return res
-			.status(400)
-			.json({ error: parsed.error.flatten().fieldErrors });
-	}
-
-	const { orderId } = req.params as { orderId: string };
-	const updated = await scopedOrders(shopId).updateStatus(
-		orderId,
-		parsed.data.status,
-	);
-
-	if (!updated) {
-		return res.status(404).json({ error: "Order not found" });
-	}
-
-	return res.json(updated);
-}
-
-export async function getOrderDownloadUrl(req: Request, res: Response) {
+export async function updateFileStatus(req: Request, res: Response) {
 	const shopId = req.auth!.shopId;
 	if (!shopId) {
 		return res.status(403).json({ error: "No shop associated with this account" });
 	}
 
-	const { orderId } = req.params as { orderId: string };
-	const order = await scopedOrders(shopId).findOne(orderId);
-
-	if (!order) {
-		return res.status(404).json({ error: "Order not found" });
+	const parsed = updateStatusSchema.safeParse(req.body);
+	if (!parsed.success) {
+		return res.status(400).json({ error: parsed.error.flatten().fieldErrors });
 	}
 
-	const downloadUrl = await createPresignedDownload(order.fileKey);
+	const { fileId } = req.params as { fileId: string };
+	const updated = await scopedOrders(shopId).updateFileStatus(fileId, parsed.data.status);
+
+	if (!updated) {
+		return res.status(404).json({ error: "File not found" });
+	}
+
+	return res.json(updated);
+}
+
+export async function getFileDownloadUrl(req: Request, res: Response) {
+	const shopId = req.auth!.shopId;
+	if (!shopId) {
+		return res.status(403).json({ error: "No shop associated with this account" });
+	}
+
+	const { fileId } = req.params as { fileId: string };
+	const file = await scopedOrders(shopId).findFile(fileId);
+
+	if (!file) {
+		return res.status(404).json({ error: "File not found" });
+	}
+
+	const downloadUrl = await createPresignedDownload(file.fileKey);
 	return res.json({ downloadUrl });
 }

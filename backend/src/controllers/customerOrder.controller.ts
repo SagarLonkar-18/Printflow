@@ -5,10 +5,14 @@ import { emitNewOrder } from "../lib/socket.js";
 import { createPresignedUpload } from "../services/s3.service.js";
 
 const createOrderSchema = z.object({
-	fileKey: z.string().min(1),
-	originalName: z.string().min(1),
-	copies: z.number().int().min(1).max(500),
-	colorMode: z.enum(["BW", "COLOR"]),
+	files: z.array(
+		z.object({
+			fileKey: z.string().min(1),
+			originalName: z.string().min(1),
+			copies: z.number().int().min(1).max(500).optional(),
+			colorMode: z.enum(["BW", "COLOR"]).optional(),
+		}),
+	).min(1, "At least one file is required"),
 });
 
 const presignSchema = z.object({
@@ -34,11 +38,16 @@ export async function createOrder(req: Request, res: Response) {
 	const order = await prisma.order.create({
 		data: {
 			shopId: shop.id,
-			fileKey: parsed.data.fileKey,
-			originalName: parsed.data.originalName,
-			copies: parsed.data.copies,
-			colorMode: parsed.data.colorMode,
+			files: {
+				create: parsed.data.files.map((f) => ({
+					fileKey: f.fileKey,
+					originalName: f.originalName,
+					...(f.copies !== undefined ? { copies: f.copies } : {}),
+				...(f.colorMode !== undefined ? { colorMode: f.colorMode } : {}),
+				})),
+			},
 		},
+		include: { files: true },
 	});
 
 	emitNewOrder(shop.id, order);
