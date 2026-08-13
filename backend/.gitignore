@@ -3,3 +3,13 @@ node_modules
 .env
 
 /src/generated/prisma
+
+dist/
+prisma.config.js
+prisma.config.js.map
+prisma.config.d.ts
+prisma.config.d.ts.map
+prisma/seed.js
+prisma/seed.js.map
+prisma/seed.d.ts
+prisma/seed.d.ts.map
