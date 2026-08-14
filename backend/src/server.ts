@@ -9,7 +9,20 @@ import { initSocket } from "./lib/socket.js";
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+const allowedOrigins = ["https://printflow.cc", "https://www.printflow.cc", ...(process.env.NODE_ENV !== "production" ? ["http://localhost:5173"] : []),];
+
+app.use(
+	cors({
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"));
+			}
+		},
+		credentials: true,
+	}),
+);
 app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
