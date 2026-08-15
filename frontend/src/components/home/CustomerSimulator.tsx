@@ -1,241 +1,212 @@
-import { QrCode, Upload, FileText, CheckCircle2, Send } from "lucide-react";
+import { useState } from "react";
+import { QrCode, FileText, Upload, X, Send, CheckCircle2 } from "lucide-react";
+
+interface SimFile {
+	name: string;
+	copies: number;
+	colorMode: "BW" | "COLOR";
+}
 
 interface CustomerSimulatorProps {
-	step: number;
-	setStep: (n: number) => void;
-	simFile: any;
-	setSimFile: (f: any) => void;
-	copies: number;
-	setCopies: (n: number) => void;
-	color: string;
-	setColor: (s: string) => void;
-	paper: string;
-	setPaper: (s: string) => void;
-	binding: string;
-	setBinding: (s: string) => void;
-	notes: string;
-	setNotes: (s: string) => void;
-	onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	onCompleteOrder: () => void;
+	onOrderSubmitted: (files: SimFile[]) => void;
 }
 
 export default function CustomerSimulator({
-	step,
-	setStep,
-	simFile,
-	setSimFile,
-	copies,
-	setCopies,
-	color,
-	setColor,
-	paper,
-	setPaper,
-	binding,
-	setBinding,
-	notes,
-	setNotes,
-	onFileUpload,
-	onCompleteOrder,
+	onOrderSubmitted,
 }: CustomerSimulatorProps) {
+	const [scanned, setScanned] = useState(false);
+	const [files, setFiles] = useState<SimFile[]>([]);
+	const [submitted, setSubmitted] = useState(false);
+
+	function addFiles(fileList: FileList | null) {
+		if (!fileList) return;
+		const newEntries = Array.from(fileList).map((f) => ({
+			name: f.name,
+			copies: 1,
+			colorMode: "BW" as const,
+		}));
+		setFiles((prev) => [...prev, ...newEntries]);
+	}
+
+	function updateFile(index: number, patch: Partial<SimFile>) {
+		setFiles((prev) =>
+			prev.map((f, i) => (i === index ? { ...f, ...patch } : f)),
+		);
+	}
+
+	function removeFile(index: number) {
+		setFiles((prev) => prev.filter((_, i) => i !== index));
+	}
+
+	function handleSubmit() {
+		if (files.length === 0) return;
+		onOrderSubmitted(files);
+		setSubmitted(true);
+		setTimeout(() => {
+			setSubmitted(false);
+			setFiles([]);
+			setScanned(false);
+		}, 2000);
+	}
+
 	return (
-		<div className="lg:col-span-5 bg-[#FAF9F5] rounded-3xl p-6 sm:p-8 border border-[#E5E2D9] shadow-xl relative">
-			<div className="absolute top-4 right-4 flex items-center space-x-1.5">
-				<span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-				<span className="text-xs font-mono-code text-gray-500">Customer Phone View</span>
+		<div className="lg:col-span-5 bg-[#FAF9F5] rounded-3xl p-6 sm:p-8 border border-[#E5E2D9] shadow-xl h-[600px] flex flex-col">
+			<div className="text-center mb-6 shrink-0">
+				<p className="text-[11px] font-mono-code font-bold uppercase tracking-[0.15em] text-[#D97706] mb-2">
+					Customer View
+				</p>
+				<h3 className="text-2xl font-bold font-serif-editorial text-[#1A1A1A]">
+					Print My Shop
+				</h3>
+				<p className="text-xs text-gray-500 font-mono-code mt-1">
+					Try the exact flow your customers see
+				</p>
 			</div>
 
-			<div className="flex items-center space-x-3 mb-6">
-				<div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center border border-orange-200">
-					<QrCode className="w-5 h-5 text-[#D97706]" />
+			{submitted ? (
+				<div className="flex-1 flex flex-col items-center justify-center text-center space-y-3">
+					<div className="w-14 h-14 rounded-full bg-green-100 border border-green-300 text-green-700 flex items-center justify-center mx-auto">
+						<CheckCircle2 className="w-7 h-7" />
+					</div>
+					<p className="font-bold text-[#1A1A1A]">Order sent!</p>
+					<p className="text-xs text-gray-500 font-mono-code">
+						Check the dashboard on the right →
+					</p>
 				</div>
-				<div>
-					<h3 className="font-bold text-[#1A1A1A] text-base font-sans-clean">Step {step}: Mobile Ordering</h3>
-					<p className="text-xs text-gray-500 font-mono-code">Gupta Print Hub Stand</p>
-				</div>
-			</div>
-
-			<div className="w-full bg-gray-200 h-1.5 rounded-full mb-6 overflow-hidden">
-				<div className="bg-[#D97706] h-full transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }} />
-			</div>
-
-			{step === 1 && (
-				<div className="space-y-6 text-center py-6">
-					<div className="w-44 h-44 mx-auto bg-white p-4 rounded-2xl shadow-md border border-[#E5E2D9] flex items-center justify-center">
+			) : !scanned ? (
+				<div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+					<div className="w-56 h-56 bg-white p-3 rounded-2xl shadow-md border border-[#E5E2D9] flex items-center justify-center">
 						<img
-							src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://printflow.shop/gupta"
-							alt="QR"
-							className="w-full h-full"
+							src="/demo-qr.png"
+							alt="Demo shop QR code"
+							className="w-full h-full object-contain"
 						/>
 					</div>
-					<div className="space-y-2">
-						<h4 className="text-lg font-bold font-serif-editorial text-[#1A1A1A]">Scan Counter QR Code</h4>
-						<p className="text-sm text-gray-600">
-							Customers scan your acrylic counter stand with phone camera. No app download needed.
+					<div className="space-y-1.5">
+						<h4 className="font-bold text-[#1A1A1A] text-base">
+							Scan Counter QR Code
+						</h4>
+						<p className="text-xs text-gray-500 max-w-[260px] mx-auto">
+							Customers scan the acrylic stand at your counter
+							with their phone camera. No app needed.
 						</p>
 					</div>
 					<button
-						onClick={() => setStep(2)}
+						onClick={() => setScanned(true)}
 						className="w-full py-3.5 bg-[#1A1A1A] hover:bg-black text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 text-sm"
 					>
 						<QrCode className="w-4 h-4 text-[#D97706]" />
 						<span>Simulate QR Scan</span>
 					</button>
 				</div>
-			)}
-
-			{step === 2 && (
-				<div className="space-y-6 py-4">
-					<div className="border-2 border-dashed border-[#D97706]/40 rounded-2xl p-8 text-center bg-orange-50/50 hover:bg-orange-50 transition cursor-pointer relative">
+			) : (
+				<div className="flex-1 flex flex-col min-h-0 space-y-4">
+					<label className="shrink-0 block border-2 border-dashed border-[#D97706]/40 rounded-2xl p-6 text-center bg-white/50 hover:bg-white transition cursor-pointer relative">
 						<input
 							type="file"
-							accept=".pdf"
-							onChange={onFileUpload}
+							accept="application/pdf"
+							multiple
 							className="absolute inset-0 opacity-0 cursor-pointer"
+							onChange={(e) => addFiles(e.target.files)}
 						/>
-						<Upload className="w-12 h-12 text-[#D97706] mx-auto mb-3 animate-bounce" />
-						<h4 className="font-bold text-[#1A1A1A] text-base">Upload Document (PDF)</h4>
-						<p className="text-xs text-gray-500 mt-1">Tax_Audit_Report_2025.pdf (Preflight verified)</p>
-					</div>
+						<Upload className="w-7 h-7 text-[#D97706] mx-auto mb-2" />
+						<p className="text-sm font-medium text-[#1A1A1A]">
+							Tap to add PDF(s)
+						</p>
+						<p className="text-xs text-gray-500 mt-1 font-mono-code">
+							You can select multiple files
+						</p>
+					</label>
 
-					<div className="space-y-3">
-						<div className="text-xs font-mono-code text-gray-500 uppercase">Or select sample document:</div>
+					{files.length > 0 && (
+						<div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
+							{files.map((file, i) => (
+								<div
+									key={i}
+									className="bg-white border border-[#E5E2D9] rounded-xl p-3 space-y-2"
+								>
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-2 min-w-0">
+											<FileText className="w-4 h-4 text-[#D97706] shrink-0" />
+											<span className="text-sm font-medium text-[#1A1A1A] truncate">
+												{file.name}
+											</span>
+										</div>
+										<button
+											onClick={() => removeFile(i)}
+											className="p-1 text-gray-400 hover:text-red-600 shrink-0"
+										>
+											<X className="w-4 h-4" />
+										</button>
+									</div>
+
+									<div className="flex items-center gap-2">
+										<input
+											type="number"
+											min={1}
+											value={file.copies}
+											onChange={(e) =>
+												updateFile(i, {
+													copies: Number(
+														e.target.value,
+													),
+												})
+											}
+											className="w-16 p-1.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-lg text-xs text-center"
+										/>
+										<span className="text-xs text-gray-400 font-mono-code">
+											copies
+										</span>
+										<div className="flex-1" />
+										{(["BW", "COLOR"] as const).map(
+											(mode) => (
+												<button
+													key={mode}
+													onClick={() =>
+														updateFile(i, {
+															colorMode: mode,
+														})
+													}
+													className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border ${
+														file.colorMode === mode
+															? "bg-[#1A1A1A] text-white border-black"
+															: "bg-[#FAF9F5] text-gray-600 border-[#E5E2D9]"
+													}`}
+												>
+													{mode === "BW"
+														? "B&W"
+														: "Color"}
+												</button>
+											),
+										)}
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+
+					<div className="shrink-0 space-y-2">
 						<button
-							onClick={() => {
-								setSimFile({ name: "Assignment_Physics.pdf", pages: 12, size: "1.8 MB" });
-								setStep(3);
-							}}
-							className="w-full p-3 rounded-xl bg-white hover:bg-gray-50 text-left text-sm flex items-center justify-between border border-[#E5E2D9]"
+							onClick={handleSubmit}
+							disabled={files.length === 0}
+							className="w-full py-3.5 bg-[#1A1A1A] hover:bg-black text-white font-bold rounded-xl shadow-md transition text-sm disabled:opacity-50 flex items-center justify-center space-x-2"
 						>
-							<div className="flex items-center space-x-3">
-								<FileText className="w-4 h-4 text-[#D97706]" />
-								<span className="font-medium text-[#1A1A1A]">Assignment_Physics.pdf (12 pgs)</span>
-							</div>
-							<span className="text-xs text-[#D97706] font-mono-code">Select</span>
+							<Send className="w-4 h-4" />
+							<span>
+								Submit Order
+								{files.length > 1
+									? ` (${files.length} files)`
+									: ""}
+							</span>
+						</button>
+
+						<button
+							onClick={() => setScanned(false)}
+							className="w-full text-xs text-gray-500 hover:text-black underline font-mono-code"
+						>
+							← Back to QR Scan
 						</button>
 					</div>
-
-					<button
-						onClick={() => setStep(1)}
-						className="text-xs text-gray-500 hover:text-black underline font-mono-code"
-					>
-						← Back to QR Scan
-					</button>
-				</div>
-			)}
-
-			{step === 3 && (
-				<div className="space-y-5">
-					<div className="p-3 rounded-xl bg-white border border-[#E5E2D9] flex items-center justify-between text-xs font-mono-code">
-						<div className="flex items-center space-x-2">
-							<FileText className="w-4 h-4 text-[#D97706]" />
-							<span className="text-[#1A1A1A] font-bold truncate max-w-[180px]">
-								{simFile?.name || "Document.pdf"}
-							</span>
-						</div>
-						<span className="text-green-700 font-bold">
-							₹{(simFile?.pages || 24) * copies * (color.includes("Color") ? 15 : 5)}
-						</span>
-					</div>
-
-					<div className="space-y-4 text-sm font-sans-clean">
-						<div>
-							<label className="block text-xs font-mono-code text-gray-500 mb-1.5 uppercase">Copies</label>
-							<div className="flex items-center space-x-3">
-								{[1, 2, 5, 10].map((num) => (
-									<button
-										key={num}
-										onClick={() => setCopies(num)}
-										className={`flex-1 py-2 rounded-xl font-mono-code text-xs font-bold transition border ${copies === num ? "bg-[#1A1A1A] text-white border-black" : "bg-white text-gray-700 border-[#E5E2D9] hover:bg-gray-50"}`}
-									>
-										{num}x
-									</button>
-								))}
-							</div>
-						</div>
-
-						<div>
-							<label className="block text-xs font-mono-code text-gray-500 mb-1.5 uppercase">Color Mode</label>
-							<div className="grid grid-cols-2 gap-3">
-								{["B&W (Economy)", "Color (CMYK)"].map((mode) => (
-									<button
-										key={mode}
-										onClick={() => setColor(mode)}
-										className={`py-2 px-3 rounded-xl font-medium text-xs transition border text-center ${color === mode ? "bg-[#1A1A1A] text-white border-black" : "bg-white text-gray-700 border-[#E5E2D9] hover:bg-gray-50"}`}
-									>
-										{mode}
-									</button>
-								))}
-							</div>
-						</div>
-
-						<div className="grid grid-cols-2 gap-3">
-							<div>
-								<label className="block text-xs font-mono-code text-gray-500 mb-1 uppercase">Paper Size</label>
-								<select
-									value={paper}
-									onChange={(e) => setPaper(e.target.value)}
-									className="w-full p-2.5 bg-white border border-[#E5E2D9] rounded-xl text-xs font-medium"
-								>
-									<option value="A4">A4 (Standard)</option>
-									<option value="A3">A3 (Large)</option>
-									<option value="Legal">Legal</option>
-								</select>
-							</div>
-							<div>
-								<label className="block text-xs font-mono-code text-gray-500 mb-1 uppercase">Binding</label>
-								<select
-									value={binding}
-									onChange={(e) => setBinding(e.target.value)}
-									className="w-full p-2.5 bg-white border border-[#E5E2D9] rounded-xl text-xs font-medium"
-								>
-									<option value="None">Loose Sheets</option>
-									<option value="Spiral Binding">Spiral Binding</option>
-									<option value="Hardbound">Hardbound</option>
-									<option value="Stapled">Stapled</option>
-								</select>
-							</div>
-						</div>
-
-						<div>
-							<label className="block text-xs font-mono-code text-gray-500 mb-1 uppercase">Instructions</label>
-							<input
-								type="text"
-								value={notes}
-								onChange={(e) => setNotes(e.target.value)}
-								placeholder="e.g. Print double-sided"
-								className="w-full p-2.5 bg-white border border-[#E5E2D9] rounded-xl text-xs"
-							/>
-						</div>
-					</div>
-
-					<button
-						onClick={onCompleteOrder}
-						className="w-full py-3.5 bg-[#D97706] hover:bg-[#b45309] text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 mt-4 text-sm"
-					>
-						<Send className="w-4 h-4" />
-						<span>Send Order to Shop Dashboard</span>
-					</button>
-				</div>
-			)}
-
-			{step === 4 && (
-				<div className="space-y-6 text-center py-8">
-					<div className="w-16 h-16 rounded-full bg-green-100 border border-green-300 text-green-700 flex items-center justify-center mx-auto">
-						<CheckCircle2 className="w-8 h-8" />
-					</div>
-					<div className="space-y-2">
-						<h4 className="text-xl font-bold font-serif-editorial text-[#1A1A1A]">Order Sent Instantly!</h4>
-						<p className="text-xs text-gray-600">
-							Check the Shop Owner Dashboard on the right → Your order appeared immediately without
-							WhatsApp ping-pong!
-						</p>
-					</div>
-					<button
-						onClick={() => { setStep(1); setSimFile(null); }}
-						className="py-2.5 px-6 bg-[#1A1A1A] text-white font-semibold rounded-xl text-xs transition"
-					>
-						Simulate Another Order
-					</button>
 				</div>
 			)}
 		</div>

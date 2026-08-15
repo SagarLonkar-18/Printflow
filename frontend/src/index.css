@@ -1,2 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
-@plugin "daisyui";
+
+.font-serif-editorial { font-family: 'Instrument Serif', serif; }
+.font-sans-clean { font-family: 'Plus Jakarta Sans', sans-serif; }
+.font-mono-code { font-family: 'JetBrains Mono', monospace; }
+
+body {
+	background-color: #ffffff;
+	font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+@keyframes float-left {
+	0%, 100% {
+		transform: translateY(0px) rotate(-8deg);
+	}
+	50% {
+		transform: translateY(-14px) rotate(-6deg);
+	}
+}
+
+@keyframes float-right {
+	0%, 100% {
+		transform: translateY(0px) rotate(7deg);
+	}
+	50% {
+		transform: translateY(-16px) rotate(9deg);
+	}
+}
+
+@keyframes icon-specular-sweep {
+	0% {
+		transform: translateX(-150%) skewX(-20deg);
+	}
+	100% {
+		transform: translateX(250%) skewX(-20deg);
+	}
+}
+
+.hero-float-left {
+	animation: float-left 4.5s ease-in-out infinite;
+}
+
+.hero-float-right {
+	animation: float-right 5.2s ease-in-out infinite;
+}

@@ -7,11 +7,14 @@ import SignUpPage from "./pages/SignUpPage";
 import HomePage from "./pages/HomePage";
 import { Toaster } from "sonner";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ShopSettingsPage from "./pages/ShopSettingsPage";
+import ScrollToHash from "./components/ScrollToHash";
 
 function App() {
 	return (
 		<BrowserRouter>
 			<Toaster position="top-right" richColors />
+			<ScrollToHash />
 			<Routes>
 				{/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
 				<Route path="/" element={<HomePage />} />
@@ -27,6 +30,7 @@ function App() {
 				<Route path="/shop/:slug" element={<UploadPage />} />
 				<Route path="/order/:id" element={<OrderConfirmationPage />} />
 				<Route path="/signup" element={<SignUpPage />} />
+				<Route path="/dashboard/shop" element={<ProtectedRoute><ShopSettingsPage /></ProtectedRoute>} />
 			</Routes>
 		</BrowserRouter>
 	);

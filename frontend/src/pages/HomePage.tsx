@@ -1,146 +1,120 @@
 import { useState } from "react";
-import { MOCK_ORDERS } from "../mock";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import HeroSection from "../components/home/HeroSection";
 import CustomerSimulator from "../components/home/CustomerSimulator";
-import DashboardPreview from "../components/home/DashboardPreview";
-import HowItWorksSection from "../components/home/HowItWorksSection";
-import FAQSection from "../components/home/FAQSection";
+import DashboardSimulator from "../components/home/DashboardSimulator";
+import FeaturesSection from "../components/home/FeaturesSection";
+import CursorFollower from "../components/CursorFollower";
+
+interface OrderFile {
+	id: string;
+	originalName: string;
+	copies: number;
+	colorMode: string;
+	status: string;
+}
+
+interface Order {
+	id: string;
+	createdAt: string;
+	files: OrderFile[];
+}
+
+const MOCK_QUEUE: Order[] = [
+	{
+		id: "order-1",
+		createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
+		files: [
+			{ id: "file-1", originalName: "Semester_Notes_Final.pdf", copies: 3, colorMode: "BW", status: "PENDING" },
+		],
+	},
+	{
+		id: "order-2",
+		createdAt: new Date(Date.now() - 14 * 60000).toISOString(),
+		files: [
+			{ id: "file-2", originalName: "Company_Brochure_v3.pdf", copies: 1, colorMode: "COLOR", status: "PRINTING" },
+		],
+	},
+	{
+		id: "order-3",
+		createdAt: new Date(Date.now() - 40 * 60000).toISOString(),
+		files: [
+			{ id: "file-3", originalName: "Assignment_Physics.pdf", copies: 2, colorMode: "BW", status: "COMPLETED" },
+		],
+	},
+];
 
 export default function HomePage() {
-	const [simStep, setSimStep] = useState(1);
-	const [simFile, setSimFile] = useState<any>(null);
-	const [simCopies, setSimCopies] = useState(2);
-	const [simColor, setSimColor] = useState("Color (CMYK)");
-	const [simPaper, setSimPaper] = useState("A4");
-	const [simBinding, setSimBinding] = useState("Spiral Binding");
-	const [simNotes, setSimNotes] = useState("Double sided please.");
-
-	const [dashboardOrders, setDashboardOrders] = useState(MOCK_ORDERS);
+	const [queueOrders, setQueueOrders] = useState<Order[]>(MOCK_QUEUE);
 	const [activeTab, setActiveTab] = useState("all");
 
-	function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-		const file = e.target.files?.[0] || {
-			name: "Tax_Audit_Report_2025_Final.pdf",
-			size: "2.4 MB",
-			pages: 24,
+	function handleOrderSubmitted(files: { name: string; copies: number; colorMode: "BW" | "COLOR" }[]) {
+		const newOrder: Order = {
+			id: `order-${Math.floor(1000 + Math.random() * 9000)}`,
+			createdAt: new Date().toISOString(),
+			files: files.map((f, i) => ({
+				id: `file-${Math.floor(1000 + Math.random() * 9000)}-${i}`,
+				originalName: f.name,
+				copies: f.copies,
+				colorMode: f.colorMode,
+				status: "PENDING",
+			})),
 		};
-		setSimFile(file);
-		toast.success("PDF uploaded & preflight validated!");
-		setSimStep(3);
+		setQueueOrders([newOrder, ...queueOrders]);
+		toast.success("Order sent to dashboard");
 	}
 
-	function handleCompleteOrder() {
-		const newOrderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-		const newOrder = {
-			id: newOrderId,
-			customerName: "You (Live Simulator)",
-			phone: "+91 99999 88888",
-			fileName: simFile?.name || "Customer_Document.pdf",
-			pages: simFile?.pages || 24,
-			copies: simCopies,
-			color: simColor,
-			paperSize: simPaper,
-			binding: simBinding,
-			notes: simNotes || "No special instructions",
-			status: "new",
-			timeAgo: "Just now",
-			total:
-				simCopies *
-				(simColor.includes("Color") ? 15 : 5) *
-				(simFile?.pages || 24),
-		};
-
-		setDashboardOrders([newOrder, ...dashboardOrders]);
-		setSimStep(4);
-		toast.success(
-			`Order #${newOrderId} sent successfully to shop dashboard!`,
+	function updateFileInState(fileId: string, status: string) {
+		setQueueOrders((prev) =>
+			prev.map((order) => ({
+				...order,
+				files: order.files.map((f) => (f.id === fileId ? { ...f, status } : f)),
+			})),
 		);
 	}
 
-	function updateOrderStatus(orderId: string, newStatus: string) {
-		setDashboardOrders(
-			dashboardOrders.map((o) =>
-				o.id === orderId ? { ...o, status: newStatus } : o,
-			),
-		);
-		toast.info(
-			`Order ${orderId} status updated to: ${newStatus.toUpperCase()}`,
-		);
+	function handlePrintFile(fileId: string) {
+		updateFileInState(fileId, "PRINTING");
+		toast.info("File marked as printing");
+	}
+
+	function handleCompleteFile(fileId: string) {
+		updateFileInState(fileId, "COMPLETED");
+		toast.success("File marked as completed");
 	}
 
 	return (
-		<div className="min-h-screen bg-[#FAF9F5] text-[#1A1A1A] font-sans selection:bg-[#D97706] selection:text-white relative">
-			<style
-				dangerouslySetInnerHTML={{
-					__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-        .font-serif-editorial { font-family: 'Instrument Serif', serif; }
-        .font-sans-clean { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-mono-code { font-family: 'JetBrains Mono', monospace; }
-      `,
-				}}
-			/>
-
-			<div className="bg-[#1A1A1A] text-[#FAF9F5] py-2 px-4 text-center text-xs font-mono-code tracking-wide">
-				<span>
-					⚡ PrintFlow: Instant QR PDF Ordering for Print Shops — No
-					WhatsApp required.
-				</span>
-			</div>
-
+		<div className="min-h-screen bg-white text-[#1A1A1A] font-sans selection:bg-[#D97706] selection:text-white relative">
+			<CursorFollower />
 			<Navbar />
 			<HeroSection />
 
-			<section
-				id="simulator"
-				className="py-24 bg-[#F2EFE9] border-y border-[#E5E2D9]"
-			>
+			<section id="simulator" className="relative -mt-10 sm:-mt-14 py-24 bg-[#F2EFE9]">
 				<div className="max-w-7xl mx-auto px-6 lg:px-12">
 					<div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-						<h2 className="text-4xl sm:text-5xl font-serif-editorial text-[#1A1A1A]">
-							Experience the Customer & Shop Owner Flow
-						</h2>
+						<h2 className="text-4xl sm:text-5xl font-serif-editorial text-[#1A1A1A]">Try it yourself</h2>
 						<p className="text-gray-600 font-sans-clean text-base">
-							Test the customer mobile ordering experience on the
-							left, and watch the order sync instantly to the shop
-							owner's live dashboard on the right.
+							Submit a sample order on the left and watch it appear in the order queue on the right —
+							the same interface real shop owners use.
 						</p>
 					</div>
 
 					<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-						<CustomerSimulator
-							step={simStep}
-							setStep={setSimStep}
-							simFile={simFile}
-							setSimFile={setSimFile}
-							copies={simCopies}
-							setCopies={setSimCopies}
-							color={simColor}
-							setColor={setSimColor}
-							paper={simPaper}
-							setPaper={setSimPaper}
-							binding={simBinding}
-							setBinding={setSimBinding}
-							notes={simNotes}
-							setNotes={setSimNotes}
-							onFileUpload={handleFileUpload}
-							onCompleteOrder={handleCompleteOrder}
-						/>
-						<DashboardPreview
-							orders={dashboardOrders}
+						<CustomerSimulator onOrderSubmitted={handleOrderSubmitted} />
+						<DashboardSimulator
+							orders={queueOrders}
 							activeTab={activeTab}
 							setActiveTab={setActiveTab}
-							onUpdateStatus={updateOrderStatus}
+							onPrintFile={handlePrintFile}
+							onCompleteFile={handleCompleteFile}
 						/>
 					</div>
 				</div>
 			</section>
 
-			<HowItWorksSection />
-			<FAQSection />
+			<FeaturesSection />
 			<Footer />
 		</div>
 	);

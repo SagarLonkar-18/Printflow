@@ -12,7 +12,7 @@ interface StatusTabsProps {
 
 export default function StatusTabs({ tabs, activeTab, onChange }: StatusTabsProps) {
 	return (
-		<div className="flex items-center space-x-2 mb-6 overflow-x-auto pb-2">
+		<div className="flex items-center space-x-2 mb-6 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 			{tabs.map((tab) => (
 				<button
 					key={tab.id}
