@@ -6,7 +6,9 @@ import { api } from "../lib/api";
 import Navbar from "../components/Navbar";
 
 export default function ShopSettingsPage() {
-	const [shop, setShop] = useState<{ name: string; slug: string } | null>(null);
+	const [shop, setShop] = useState<{ name: string; slug: string } | null>(
+		null,
+	);
 	const [copied, setCopied] = useState(false);
 
 	useEffect(() => {
@@ -24,6 +26,7 @@ export default function ShopSettingsPage() {
 	}
 
 	function handleDownload() {
+		if (!shop) return;
 		const svg = document.getElementById("shop-qr-svg");
 		if (!svg) return;
 		const serializer = new XMLSerializer();
@@ -59,15 +62,22 @@ export default function ShopSettingsPage() {
 				</Link>
 
 				<div className="text-center mb-10">
-					<h1 className="text-3xl font-bold font-serif-editorial text-[#1A1A1A]">Your shop's QR code</h1>
+					<h1 className="text-3xl font-bold font-serif-editorial text-[#1A1A1A]">
+						Your shop's QR code
+					</h1>
 					<p className="text-sm text-gray-500 font-sans-clean mt-2">
-						Print this and place it at your counter. Customers scan it to reach {shop.name}'s upload page.
+						Print this and place it at your counter. Customers scan
+						it to reach {shop.name}'s upload page.
 					</p>
 				</div>
 
 				<div className="bg-[#F2EFE9] border border-[#E5E2D9] rounded-3xl p-10 flex flex-col items-center space-y-6">
 					<div className="bg-white p-6 rounded-2xl border border-[#E5E2D9] shadow-sm">
-						<QRCodeSVG id="shop-qr-svg" value={shopUrl} size={220} />
+						<QRCodeSVG
+							id="shop-qr-svg"
+							value={shopUrl}
+							size={220}
+						/>
 					</div>
 
 					<div className="w-full space-y-3">
@@ -80,7 +90,11 @@ export default function ShopSettingsPage() {
 								className="p-2.5 rounded-lg bg-white border border-[#E5E2D9] hover:bg-gray-50 transition shrink-0"
 								title="Copy link"
 							>
-								{copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-600" />}
+								{copied ? (
+									<Check className="w-4 h-4 text-green-600" />
+								) : (
+									<Copy className="w-4 h-4 text-gray-600" />
+								)}
 							</button>
 						</div>
 

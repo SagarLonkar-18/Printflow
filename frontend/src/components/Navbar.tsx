@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	Menu,
 	X,
@@ -12,6 +12,7 @@ import {
 import { useAuthStore } from "../store/auth.store";
 // import logo from "/printflow-logo-with-bg.png";
 import logo from "/printflow_logo_light.png";
+import { api } from "../lib/api";
 
 export default function Navbar() {
 	const navigate = useNavigate();
@@ -21,6 +22,14 @@ export default function Navbar() {
 
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [profileOpen, setProfileOpen] = useState(false);
+
+	const [shop, setShop] = useState<{ name: string } | null>(null);
+	const user = useAuthStore((s) => s.user);
+
+	useEffect(() => {
+		if (!token) return;
+		api.get("/me/shop").then((res) => setShop(res.data));
+	}, [token]);
 
 	function handleLogout() {
 		logout();
@@ -155,7 +164,9 @@ export default function Navbar() {
 									"
 								>
 									<LayoutDashboard className="w-3.5 h-3.5 text-white/80" />
-									<span className="text-sm font-semibold">Dashboard</span>
+									<span className="text-sm font-semibold">
+										Dashboard
+									</span>
 								</Link>
 
 								{/* Profile */}
@@ -182,7 +193,9 @@ export default function Navbar() {
 										"
 									>
 										<button
-											onClick={() => setProfileOpen(!profileOpen)}
+											onClick={() =>
+												setProfileOpen(!profileOpen)
+											}
 											className="
 												w-8
 												h-8
@@ -206,7 +219,9 @@ export default function Navbar() {
 										</button>
 
 										<button
-											onClick={() => setProfileOpen(!profileOpen)}
+											onClick={() =>
+												setProfileOpen(!profileOpen)
+											}
 											className="
 												w-6
 												h-8
@@ -223,7 +238,9 @@ export default function Navbar() {
 										>
 											<ChevronDown
 												className={`w-3.5 h-3.5 transition-transform duration-200 ${
-													profileOpen ? "rotate-180" : ""
+													profileOpen
+														? "rotate-180"
+														: ""
 												}`}
 											/>
 										</button>
@@ -278,10 +295,11 @@ export default function Navbar() {
 
 													<div className="min-w-0">
 														<p className="font-semibold text-[#1A1A1A] truncate">
-															PrintFlow Demo Shop
+															{shop?.name ??
+																"Your Shop"}
 														</p>
 														<p className="text-sm text-gray-500 truncate">
-															demo@printflow.com
+															{user?.email ?? ""}
 														</p>
 													</div>
 												</div>
@@ -293,7 +311,9 @@ export default function Navbar() {
 											<div className="p-2">
 												<Link
 													to="/dashboard/shop"
-													onClick={() => setProfileOpen(false)}
+													onClick={() =>
+														setProfileOpen(false)
+													}
 													className="
 														flex
 														items-center
@@ -447,7 +467,7 @@ export default function Navbar() {
 							link.to.startsWith("/#") ? (
 								<Link
 									key={link.label}
-									href={link.to}
+									to={link.to}
 									onClick={() => setMobileMenuOpen(false)}
 									className="
 										block
