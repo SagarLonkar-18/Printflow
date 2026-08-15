@@ -448,69 +448,48 @@ export default function Navbar() {
 			{mobileMenuOpen && (
 				<div
 					className="
-						md:hidden
-						max-w-[1450px]
-						mx-auto
-						mt-3
-						rounded-[24px]
-						bg-white/50
-						backdrop-blur-3xl
-						backdrop-saturate-200
-						border
-						border-white/50
-						shadow-[0_15px_50px_rgba(0,0,0,0.10)]
-						p-5
-					"
+					md:hidden
+					max-w-[1450px]
+					mx-auto
+					mt-3
+					rounded-[24px]
+					bg-white/50
+					backdrop-blur-3xl
+					backdrop-saturate-200
+					border
+					border-white/50
+					shadow-[0_15px_50px_rgba(0,0,0,0.10)]
+					p-3
+				"
 				>
-					<div className="space-y-2">
-						{navLinks.map((link) =>
-							link.to.startsWith("/#") ? (
-								<Link
-									key={link.label}
-									to={link.to}
-									onClick={() => setMobileMenuOpen(false)}
-									className="
-										block
-										px-4
-										py-3.5
+					<div className="space-y-1">
+						{navLinks.map((link) => (
+							<Link
+								key={link.label}
+								to={link.to}
+								onClick={() => setMobileMenuOpen(false)}
+								className="
+						block
+						px-4
+						py-3.5
 
-										rounded-2xl
+						rounded-2xl
 
-										font-medium
-										text-[#374151]
-										bg-gray-200/30
+						font-medium
+						text-sm
+						text-[#374151]
 
-										hover:bg-white/50
-									"
-								>
-									{link.label}
-								</Link>
-							) : (
-								<Link
-									key={link.label}
-									to={link.to}
-									onClick={() => setMobileMenuOpen(false)}
-									className="
-										block
-										px-4
-										py-3.5
-
-										rounded-2xl
-
-										font-medium
-										text-[#374151]
-										bg-gray-200/30
-
-										hover:bg-white/50
-									"
-								>
-									{link.label}
-								</Link>
-							),
-						)}
+						hover:bg-white/70
+						active:bg-white/90
+						transition
+					"
+							>
+								{link.label}
+							</Link>
+						))}
 					</div>
 
-					<div className="h-px bg-white/40 my-4" />
+					<div className="h-px bg-[#1A1A1A]/10 my-3" />
 
 					{token ? (
 						<div className="space-y-2">
@@ -518,21 +497,27 @@ export default function Navbar() {
 								to="/dashboard"
 								onClick={() => setMobileMenuOpen(false)}
 								className="
-									flex
-									items-center
-									justify-center
-									gap-2
+						flex
+						items-center
+						justify-center
+						gap-2
 
-									w-full
-									py-3.5
+						w-full
+						py-3.5
 
-									rounded-2xl
+						rounded-2xl
 
-									bg-[#1A1A1A]
-									text-white
+						bg-[#1A1A1A]
+						text-white
 
-									font-semibold
-								"
+						text-sm
+						font-semibold
+
+						shadow-[0_6px_20px_rgba(0,0,0,0.18)]
+
+						active:scale-[0.98]
+						transition
+					"
 							>
 								<LayoutDashboard className="w-4 h-4" />
 								Dashboard
@@ -542,24 +527,28 @@ export default function Navbar() {
 								to="/dashboard/shop"
 								onClick={() => setMobileMenuOpen(false)}
 								className="
-									flex
-									items-center
-									justify-center
-									gap-2
+						flex
+						items-center
+						justify-center
+						gap-2
 
-									w-full
-									py-3.5
+						w-full
+						py-3.5
 
-									rounded-2xl
+						rounded-2xl
 
-									bg-[#1A1A1A]
-									text-white
-									border
-									border-white/60
+						bg-[#1A1A1A]
+						border
+						border-white/70
 
-									font-semibold
-									text-[#374151]
-								"
+						text-sm
+						font-semibold
+						text-white
+
+						hover:bg-white/80
+						active:scale-[0.98]
+						transition
+					"
 							>
 								<QrCode className="w-4 h-4" />
 								My QR
@@ -568,18 +557,23 @@ export default function Navbar() {
 							<button
 								onClick={handleLogout}
 								className="
-									w-full
-									py-3.5
+						w-full
+						py-3.5
 
-									rounded-2xl
+						rounded-2xl
 
-									bg-red-600
-									font-semibold
-									text-white
+						bg-red-200
+						border
+						border-red-100
 
-									hover:bg-red-50/60
-									transition
-								"
+						text-sm
+						font-semibold
+						text-red-900
+
+						hover:bg-red-100
+						active:scale-[0.98]
+						transition
+					"
 							>
 								Log out
 							</button>
@@ -589,19 +583,25 @@ export default function Navbar() {
 							to="/login"
 							onClick={() => setMobileMenuOpen(false)}
 							className="
-								block
-								w-full
-								text-center
+					block
+					w-full
+					text-center
 
-								py-3.5
+					py-3.5
 
-								rounded-2xl
+					rounded-2xl
 
-								bg-[#1A1A1A]
-								text-white
+					bg-[#1A1A1A]
+					text-white
 
-								font-semibold
-							"
+					text-sm
+					font-semibold
+
+					shadow-[0_6px_20px_rgba(0,0,0,0.18)]
+
+					active:scale-[0.98]
+					transition
+				"
 						>
 							Login
 						</Link>
