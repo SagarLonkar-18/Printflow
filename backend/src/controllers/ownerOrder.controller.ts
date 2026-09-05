@@ -2,6 +2,7 @@ import { scopedOrders } from "../lib/scopedOrders.js";
 import type { Request, Response } from "express";
 import { createPresignedDownload } from "../services/s3.service.js";
 import { z } from "zod";
+import { getDateRangeBounds } from "../lib/dateRanges.js";
 
 const updateStatusSchema = z.object({
 	status: z.enum(["PRINTING", "COMPLETED"]),
@@ -15,7 +16,12 @@ export async function listMyOrders(req: Request, res: Response) {
 			.json({ error: "No shop associated with this account" });
 	}
 
-	const orders = await scopedOrders(shopId).findMany();
+	const range = (req.query.range as string) || "today";
+	const bounds = getDateRangeBounds(range);
+
+	const orders = await scopedOrders(shopId).findMany(
+		bounds ? { createdAfter: bounds.start, createdBefore: bounds.end } : undefined,
+	);
 	return res.json(orders);
 }
 

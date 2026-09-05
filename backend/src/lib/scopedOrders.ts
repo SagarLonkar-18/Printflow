@@ -7,9 +7,18 @@ import { prisma } from "./prisma.js";
  */
 export function scopedOrders(shopId: string) {
 	return {
-		findMany: () =>
+		findMany: (options?: { createdAfter?: Date; createdBefore?: Date }) =>
 			prisma.order.findMany({
-				where: { shopId },
+				where: {
+					shopId,
+					...(options?.createdAfter && { createdAt: { gte: options.createdAfter } }),
+					...(options?.createdBefore && {
+						createdAt: {
+							...(options?.createdAfter ? { gte: options.createdAfter } : {}),
+							lt: options.createdBefore,
+						},
+					}),
+				},
 				orderBy: { createdAt: "desc" },
 				include: { files: true },
 			}),
