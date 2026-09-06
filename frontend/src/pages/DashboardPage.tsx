@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { api } from "../lib/api";
 import { useAuthStore } from "../store/auth.store";
 import Navbar from "../components/Navbar";
 import OrderCard from "../components/OrderCard";
 import StatusTabs from "../components/StatusTabs";
+import DateTabs from "../components/DateTabs";
 import { Link } from "react-router-dom";
 
 interface OrderFile {
@@ -27,12 +28,19 @@ export default function DashboardPage() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState("all");
+	const [dateRange, setDateRange] = useState("today");
+
+	const dateRangeRef = useRef(dateRange);
+	useEffect(() => {
+		dateRangeRef.current = dateRange;
+	}, [dateRange]);
 
 	useEffect(() => {
-		api.get("/me/orders")
+		setLoading(true);
+		api.get(`/me/orders?range=${dateRange}`)
 			.then((res) => setOrders(res.data))
 			.finally(() => setLoading(false));
-	}, []);
+	}, [dateRange]);
 
 	useEffect(() => {
 		if (!token) return;
@@ -42,7 +50,12 @@ export default function DashboardPage() {
 		});
 
 		socket.on("order:new", (order: Order) => {
-			setOrders((prev) => [order, ...prev]);
+			if (
+				dateRangeRef.current === "today" ||
+				dateRangeRef.current === "all"
+			) {
+				setOrders((prev) => [order, ...prev]);
+			}
 		});
 
 		return () => {
@@ -122,6 +135,7 @@ export default function DashboardPage() {
 					</Link>
 				</div>
 
+				<DateTabs activeRange={dateRange} onChange={setDateRange} />
 				<StatusTabs
 					tabs={tabs}
 					activeTab={activeTab}
