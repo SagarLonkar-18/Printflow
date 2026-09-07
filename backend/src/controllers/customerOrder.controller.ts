@@ -5,14 +5,18 @@ import { emitNewOrder } from "../lib/socket.js";
 import { createPresignedUpload } from "../services/s3.service.js";
 
 const createOrderSchema = z.object({
-	files: z.array(
-		z.object({
-			fileKey: z.string().min(1),
-			originalName: z.string().min(1),
-			copies: z.number().int().min(1).max(500).optional(),
-			colorMode: z.enum(["BW", "COLOR"]).optional(),
-		}),
-	).min(1, "At least one file is required"),
+	files: z
+		.array(
+			z.object({
+				fileKey: z.string().min(1),
+				originalName: z.string().min(1),
+				pageCount: z.number().int().min(1).max(2000).optional(),
+				doubleSided: z.boolean().optional(),
+				copies: z.number().int().min(1).max(500).optional(),
+				colorMode: z.enum(["BW", "COLOR"]).optional(),
+			}),
+		)
+		.min(1, "At least one file is required"),
 });
 
 const presignSchema = z.object({
@@ -42,8 +46,16 @@ export async function createOrder(req: Request, res: Response) {
 				create: parsed.data.files.map((f) => ({
 					fileKey: f.fileKey,
 					originalName: f.originalName,
+					...(f.pageCount !== undefined
+						? { pageCount: f.pageCount }
+						: {}),
+					...(f.doubleSided !== undefined
+						? { doubleSided: f.doubleSided }
+						: {}),
 					...(f.copies !== undefined ? { copies: f.copies } : {}),
-				...(f.colorMode !== undefined ? { colorMode: f.colorMode } : {}),
+					...(f.colorMode !== undefined
+						? { colorMode: f.colorMode }
+						: {}),
 				})),
 			},
 		},
