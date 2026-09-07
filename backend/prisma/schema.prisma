@@ -16,6 +16,8 @@ model Shop {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
+  bwPrice    Float    @default(2)
+  colorPrice Float    @default(10)
   createdAt DateTime @default(now())
   orders    Order[]  // <- "a shop has many orders" (this line creates no column, it's just for the Prisma Client's convenience)
   ownerId   String   @unique
@@ -36,6 +38,8 @@ model OrderFile {
   order        Order    @relation(fields: [orderId], references: [id])
   fileKey      String
   originalName String
+  pageCount    Int      @default(1)
+  doubleSided  Boolean  @default(false)
   copies       Int      @default(1)
   colorMode    String   @default("BW")
   status       String   @default("PENDING")
