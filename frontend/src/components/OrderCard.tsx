@@ -26,11 +26,24 @@ const STATUS_CONFIG = {
 	COMPLETED: { label: "Completed", dot: "bg-green-500" },
 } as const;
 
-function formatOrderTime(iso: string) {
-	return new Date(iso).toLocaleTimeString(undefined, {
+function formatOrderTimestamp(iso: string) {
+	const date = new Date(iso);
+	const now = new Date();
+	const isToday = date.toDateString() === now.toDateString();
+
+	const time = date.toLocaleTimeString(undefined, {
 		hour: "numeric",
 		minute: "2-digit",
 	});
+
+	if (isToday) return time;
+
+	const dateStr = date.toLocaleDateString(undefined, {
+		day: "numeric",
+		month: "short",
+	});
+
+	return `${dateStr} · ${time}`;
 }
 
 export default function OrderCard({ order, onPrintFile, onCompleteFile }: OrderCardProps) {
@@ -46,7 +59,7 @@ export default function OrderCard({ order, onPrintFile, onCompleteFile }: OrderC
 				<p className="text-xs text-gray-500 font-mono-code">
 					Order &middot; {order.files.length} file{order.files.length !== 1 ? "s" : ""}
 				</p>
-				<p className="text-xs text-gray-500 font-mono-code">{formatOrderTime(order.createdAt)}</p>
+				<p className="text-xs text-gray-500 font-mono-code">{formatOrderTimestamp(order.createdAt)}</p>
 			</div>
 
 			<div className="space-y-3">
