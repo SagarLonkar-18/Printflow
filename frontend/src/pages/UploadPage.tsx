@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FileText, Upload, Loader2, X } from "lucide-react";
 import { api } from "../lib/api";
+import { getPdfPageCount } from "../lib/pdfUtils";
 
 interface ShopInfo {
 	id: string;
@@ -13,6 +14,8 @@ interface FileEntry {
 	file: File;
 	copies: number;
 	colorMode: "BW" | "COLOR";
+	doubleSided: boolean;
+	pageCount: number | null;
 }
 
 export default function UploadPage() {
@@ -27,24 +30,39 @@ export default function UploadPage() {
 
 	useEffect(() => {
 		if (!slug) return;
-		api
-			.get(`/shops/${slug}`)
+		api.get(`/shops/${slug}`)
 			.then((res) => setShop(res.data))
 			.catch(() => setNotFound(true));
 	}, [slug]);
 
 	function addFiles(fileList: FileList | null) {
 		if (!fileList) return;
-		const newEntries = Array.from(fileList).map((file) => ({
+		const newEntries: FileEntry[] = Array.from(fileList).map((file) => ({
 			file,
 			copies: 1,
-			colorMode: "BW" as const,
+			colorMode: "BW",
+			doubleSided: false,
+			pageCount: null,
 		}));
 		setEntries((prev) => [...prev, ...newEntries]);
+
+		// Kick off page-count extraction in the background for each newly
+		// added file. Never blocks the UI - the file shows up immediately,
+		// and each entry's pageCount fills in independently once ready.
+		newEntries.forEach(async (entry) => {
+			const count = await getPdfPageCount(entry.file);
+			setEntries((prev) =>
+				prev.map((e) =>
+					e.file === entry.file ? { ...e, pageCount: count } : e,
+				),
+			);
+		});
 	}
 
 	function updateEntry(index: number, patch: Partial<FileEntry>) {
-		setEntries((prev) => prev.map((e, i) => (i === index ? { ...e, ...patch } : e)));
+		setEntries((prev) =>
+			prev.map((e, i) => (i === index ? { ...e, ...patch } : e)),
+		);
 	}
 
 	function removeEntry(index: number) {
@@ -57,9 +75,6 @@ export default function UploadPage() {
 		setError(null);
 
 		try {
-			// Upload every file to S3 first, collecting each one's fileKey.
-			// Done sequentially for simplicity - fine for the handful of files
-			// a customer realistically uploads at once.
 			const uploadedFiles = [];
 			for (const entry of entries) {
 				const presignRes = await api.post(`/shops/${slug}/upload-url`, {
@@ -77,6 +92,8 @@ export default function UploadPage() {
 				uploadedFiles.push({
 					fileKey,
 					originalName: entry.file.name,
+					pageCount: entry.pageCount ?? 1,
+					doubleSided: entry.doubleSided,
 					copies: entry.copies,
 					colorMode: entry.colorMode,
 				});
@@ -89,7 +106,9 @@ export default function UploadPage() {
 			navigate(`/order/${orderRes.data.id}`);
 		} catch (err) {
 			console.error(err);
-			setError("Something went wrong submitting your order. Please try again.");
+			setError(
+				"Something went wrong submitting your order. Please try again.",
+			);
 		} finally {
 			setUploading(false);
 		}
@@ -113,8 +132,12 @@ export default function UploadPage() {
 			<div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center px-6">
 				{fontStyle}
 				<div className="text-center">
-					<p className="text-2xl font-bold font-serif-editorial text-[#1A1A1A] mb-2">Shop not found</p>
-					<p className="text-sm text-gray-500 font-mono-code">Check the QR code and try scanning again.</p>
+					<p className="text-2xl font-bold font-serif-editorial text-[#1A1A1A] mb-2">
+						Shop not found
+					</p>
+					<p className="text-sm text-gray-500 font-mono-code">
+						Check the QR code and try scanning again.
+					</p>
 				</div>
 			</div>
 		);
@@ -138,7 +161,9 @@ export default function UploadPage() {
 						<span className="w-2 h-2 rounded-full bg-[#D97706]" />
 						<span>Upload your documents</span>
 					</div>
-					<h1 className="text-3xl font-bold font-serif-editorial text-[#1A1A1A]">{shop.name}</h1>
+					<h1 className="text-3xl font-bold font-serif-editorial text-[#1A1A1A]">
+						{shop.name}
+					</h1>
 					<p className="text-sm text-gray-500 font-mono-code mt-1">
 						Add one or more files, adjust settings per file
 					</p>
@@ -153,66 +178,140 @@ export default function UploadPage() {
 							className="absolute inset-0 opacity-0 cursor-pointer"
 							onChange={(e) => addFiles(e.target.files)}
 						/>
+
 						<Upload className="w-7 h-7 text-[#D97706] mx-auto mb-2" />
-						<p className="text-sm font-medium text-[#1A1A1A]">Tap to add PDF(s)</p>
-						<p className="text-xs text-gray-500 mt-1 font-mono-code">You can select multiple files</p>
+						<p className="text-sm font-medium text-[#1A1A1A]">
+							Tap to add PDF(s)
+						</p>
+						<p className="text-xs text-gray-500 mt-1 font-mono-code">
+							You can select multiple files
+						</p>
 					</label>
 
-					{entries.length > 0 && (
-						<div className="space-y-3">
-							{entries.map((entry, i) => (
-								<div key={i} className="bg-white border border-[#E5E2D9] rounded-xl p-3 space-y-2">
-									<div className="flex items-center justify-between">
-										<div className="flex items-center space-x-2 min-w-0">
-											<FileText className="w-4 h-4 text-[#D97706] shrink-0" />
-											<span className="text-sm font-medium text-[#1A1A1A] truncate">
-												{entry.file.name}
-											</span>
-										</div>
-										<button onClick={() => removeEntry(i)} className="p-1 text-gray-400 hover:text-red-600 shrink-0">
-											<X className="w-4 h-4" />
-										</button>
+					{entries.map((entry, i) => (
+						<div
+							key={i}
+							className="bg-white border border-[#E5E2D9] rounded-2xl p-4 space-y-3.5"
+						>
+							<div className="flex items-start justify-between gap-3">
+								<div className="flex items-center space-x-2.5 min-w-0">
+									<div className="w-9 h-9 rounded-lg bg-[#F2EFE9] flex items-center justify-center shrink-0">
+										<FileText className="w-4 h-4 text-[#D97706]" />
 									</div>
+									<div className="min-w-0">
+										<p className="text-sm font-semibold text-[#1A1A1A] truncate">
+											{entry.file.name}
+										</p>
+										<p className="text-xs text-gray-400 font-mono-code mt-0.5">
+											{entry.pageCount === null
+												? "Calculating pages…"
+												: `${entry.pageCount} pages`}
+										</p>
+									</div>
+								</div>
+								<button
+									onClick={() => removeEntry(i)}
+									className="p-1 text-gray-300 hover:text-red-600 transition shrink-0"
+								>
+									<X className="w-4 h-4" />
+								</button>
+							</div>
 
-									<div className="flex items-center gap-2">
-										<input
-											type="number"
-											min={1}
-											value={entry.copies}
-											onChange={(e) => updateEntry(i, { copies: Number(e.target.value) })}
-											className="w-16 p-1.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-lg text-xs text-center"
-										/>
-										<span className="text-xs text-gray-400 font-mono-code">copies</span>
+							<div className="h-px bg-[#F2EFE9]" />
 
-										<div className="flex-1" />
+							<div className="space-y-3">
+								<div className="flex items-center justify-between">
+									<span className="text-xs text-gray-500 font-mono-code">
+										Copies
+									</span>
+									<input
+										type="number"
+										min={1}
+										value={entry.copies}
+										onChange={(e) =>
+											updateEntry(i, {
+												copies: Number(e.target.value),
+											})
+										}
+										className="w-16 p-1.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-lg text-xs text-center font-medium"
+									/>
+								</div>
 
-										{(["BW", "COLOR"] as const).map((mode) => (
+								<div className="flex items-center justify-between">
+									<span className="text-xs text-gray-500 font-mono-code">
+										Color
+									</span>
+									<div className="flex gap-1.5">
+										{(["BW", "COLOR"] as const).map(
+											(mode) => (
+												<button
+													key={mode}
+													onClick={() =>
+														updateEntry(i, {
+															colorMode: mode,
+														})
+													}
+													className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition border ${
+														entry.colorMode === mode
+															? "bg-[#1A1A1A] text-white border-black"
+															: "bg-[#FAF9F5] text-gray-600 border-[#E5E2D9]"
+													}`}
+												>
+													{mode === "BW"
+														? "B&W"
+														: "Color"}
+												</button>
+											),
+										)}
+									</div>
+								</div>
+
+								<div className="flex items-center justify-between">
+									<span className="text-xs text-gray-500 font-mono-code">
+										Sides
+									</span>
+									<div className="flex gap-1.5">
+										{[
+											{ value: false, label: "Single" },
+											{ value: true, label: "Double" },
+										].map((opt) => (
 											<button
-												key={mode}
-												onClick={() => updateEntry(i, { colorMode: mode })}
-												className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition border ${
-													entry.colorMode === mode
+												key={String(opt.value)}
+												onClick={() =>
+													updateEntry(i, {
+														doubleSided: opt.value,
+													})
+												}
+												className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition border ${
+													entry.doubleSided ===
+													opt.value
 														? "bg-[#1A1A1A] text-white border-black"
 														: "bg-[#FAF9F5] text-gray-600 border-[#E5E2D9]"
 												}`}
 											>
-												{mode === "BW" ? "B&W" : "Color"}
+												{opt.label}
 											</button>
 										))}
 									</div>
 								</div>
-							))}
+							</div>
 						</div>
-					)}
+					))}
 
-					{error && <p className="text-red-600 text-xs font-mono-code">{error}</p>}
+					{error && (
+						<p className="text-red-600 text-xs font-mono-code">
+							{error}
+						</p>
+					)}
 
 					<button
 						onClick={handleSubmit}
 						disabled={entries.length === 0 || uploading}
 						className="w-full py-3.5 bg-[#1A1A1A] hover:bg-black text-white font-bold rounded-xl shadow-md transition text-sm disabled:opacity-50 flex items-center justify-center space-x-2"
 					>
-						{uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+						{uploading && (
+							<Loader2 className="w-4 h-4 animate-spin" />
+						)}
 						<span>
 							{uploading
 								? "Submitting..."
