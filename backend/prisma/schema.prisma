@@ -16,8 +16,10 @@ model Shop {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
-  bwPrice    Float    @default(2)
-  colorPrice Float    @default(10)
+  bwSinglePrice    Float    @default(2)
+  bwDoublePrice    Float    @default(1.5)
+  colorSinglePrice Float    @default(10)
+  colorDoublePrice Float    @default(8)
   createdAt DateTime @default(now())
   orders    Order[]  // <- "a shop has many orders" (this line creates no column, it's just for the Prisma Client's convenience)
   ownerId   String   @unique

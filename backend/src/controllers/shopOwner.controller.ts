@@ -3,8 +3,10 @@ import { prisma } from "../lib/prisma.js";
 import { z } from "zod";
 
 const updatePricingSchema = z.object({
-	bwPrice: z.number().positive(),
-	colorPrice: z.number().positive(),
+	bwSinglePrice: z.number().positive(),
+	bwDoublePrice: z.number().positive(),
+	colorSinglePrice: z.number().positive(),
+	colorDoublePrice: z.number().positive(),
 });
 
 export async function getMyShop(req: Request, res: Response) {
