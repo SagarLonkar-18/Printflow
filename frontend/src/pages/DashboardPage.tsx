@@ -127,12 +127,6 @@ export default function DashboardPage() {
 							files total
 						</p>
 					</div>
-					<Link
-						to="/dashboard/shop"
-						className="shrink-0 flex items-center space-x-2 text-xs font-mono-code font-bold text-white bg-[#D97706] hover:bg-[#b45309] px-4 py-2.5 rounded-lg transition whitespace-nowrap shadow-sm"
-					>
-						<span>View QR Code</span>
-					</Link>
 				</div>
 
 				<DateTabs activeRange={dateRange} onChange={setDateRange} />

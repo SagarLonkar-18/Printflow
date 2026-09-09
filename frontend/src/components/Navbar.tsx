@@ -7,6 +7,7 @@ import {
 	LayoutDashboard,
 	UserRound,
 	QrCode,
+	Settings,
 	ChevronDown,
 } from "lucide-react";
 import { useAuthStore } from "../store/auth.store";
@@ -308,9 +309,9 @@ export default function Navbar() {
 											<div className="h-px bg-white/40" />
 
 											{/* MENU */}
-											<div className="p-2">
+											<div className="p-2 space-y-1">
 												<Link
-													to="/dashboard/shop"
+													to="/dashboard/shop-qr"
 													onClick={() =>
 														setProfileOpen(false)
 													}
@@ -335,6 +336,34 @@ export default function Navbar() {
 												>
 													<QrCode className="w-[18px] h-[18px]" />
 													My QR
+												</Link>
+
+												<Link
+													to="/dashboard/settings"
+													onClick={() =>
+														setProfileOpen(false)
+													}
+													className="
+													flex
+													items-center
+													gap-3
+
+													px-4
+													py-3.5
+
+													rounded-2xl
+
+													text-sm
+													font-medium
+													text-[#374151]
+													bg-gray-200
+
+													hover:bg-black/80 hover:text-white
+													transition
+												"
+												>
+													<Settings className="w-[18px] h-[18px]" />
+													Settings
 												</Link>
 											</div>
 
@@ -469,20 +498,20 @@ export default function Navbar() {
 								to={link.to}
 								onClick={() => setMobileMenuOpen(false)}
 								className="
-						block
-						px-4
-						py-3.5
+									block
+									px-4
+									py-3.5
 
-						rounded-2xl
+									rounded-2xl
 
-						font-medium
-						text-sm
-						text-[#374151]
+									font-medium
+									text-sm
+									text-[#374151]
 
-						hover:bg-white/70
-						active:bg-white/90
-						transition
-					"
+									hover:bg-white/70
+									active:bg-white/90
+									transition
+								"
 							>
 								{link.label}
 							</Link>
@@ -494,64 +523,65 @@ export default function Navbar() {
 					{token ? (
 						<div className="space-y-2">
 							<Link
-								to="/dashboard"
+								to="/dashboard/shop-qr"
 								onClick={() => setMobileMenuOpen(false)}
 								className="
-						flex
-						items-center
-						justify-center
-						gap-2
+									flex
+									items-center
+									justify-center
+									gap-2
 
-						w-full
-						py-3.5
+									w-full
+									py-3.5
 
-						rounded-2xl
+									rounded-2xl
 
-						bg-[#1A1A1A]
-						text-white
+									bg-[#1A1A1A]
+									border
+									border-white/70
 
-						text-sm
-						font-semibold
+									text-sm
+									font-semibold
+									text-white
 
-						shadow-[0_6px_20px_rgba(0,0,0,0.18)]
-
-						active:scale-[0.98]
-						transition
-					"
-							>
-								<LayoutDashboard className="w-4 h-4" />
-								Dashboard
-							</Link>
-
-							<Link
-								to="/dashboard/shop"
-								onClick={() => setMobileMenuOpen(false)}
-								className="
-						flex
-						items-center
-						justify-center
-						gap-2
-
-						w-full
-						py-3.5
-
-						rounded-2xl
-
-						bg-[#1A1A1A]
-						border
-						border-white/70
-
-						text-sm
-						font-semibold
-						text-white
-
-						hover:bg-white/80
-						active:scale-[0.98]
-						transition
-					"
+									hover:bg-white/80
+									active:scale-[0.98]
+									transition
+								"
 							>
 								<QrCode className="w-4 h-4" />
 								My QR
+							</Link>
+
+							<Link
+								to="/dashboard/settings"
+								onClick={() => setMobileMenuOpen(false)}
+								className="
+									flex
+									items-center
+									justify-center
+									gap-2
+
+									w-full
+									py-3.5
+
+									rounded-2xl
+
+									bg-[#1A1A1A]
+									border
+									border-white/70
+
+									text-sm
+									font-semibold
+									text-white
+
+									hover:bg-white/80
+									active:scale-[0.98]
+									transition
+								"
+							>
+								<Settings className="w-4 h-4" />
+								Settings
 							</Link>
 
 							<button

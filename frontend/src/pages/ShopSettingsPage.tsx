@@ -1,52 +1,36 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Download, Copy, Check, ArrowLeft } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { ArrowLeft } from "lucide-react";
 import { api } from "../lib/api";
 import Navbar from "../components/Navbar";
 
 export default function ShopSettingsPage() {
-	const [shop, setShop] = useState<{ name: string; slug: string } | null>(
-		null,
-	);
-	const [copied, setCopied] = useState(false);
+	const [loaded, setLoaded] = useState(false);
+	const [bwPrice, setBwPrice] = useState(0);
+	const [colorPrice, setColorPrice] = useState(0);
+	const [savingPricing, setSavingPricing] = useState(false);
+	const [pricingSaved, setPricingSaved] = useState(false);
 
 	useEffect(() => {
-		api.get("/me/shop").then((res) => setShop(res.data));
+		api.get("/me/shop").then((res) => {
+			setBwPrice(res.data.bwPrice);
+			setColorPrice(res.data.colorPrice);
+			setLoaded(true);
+		});
 	}, []);
 
-	if (!shop) return null;
-
-	const shopUrl = `${window.location.origin}/shop/${shop.slug}`;
-
-	function handleCopy() {
-		navigator.clipboard.writeText(shopUrl);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+	async function savePricing() {
+		setSavingPricing(true);
+		try {
+			await api.patch("/me/shop/pricing", { bwPrice, colorPrice });
+			setPricingSaved(true);
+			setTimeout(() => setPricingSaved(false), 2000);
+		} finally {
+			setSavingPricing(false);
+		}
 	}
 
-	function handleDownload() {
-		if (!shop) return;
-		const svg = document.getElementById("shop-qr-svg");
-		if (!svg) return;
-		const serializer = new XMLSerializer();
-		const svgStr = serializer.serializeToString(svg);
-		const canvas = document.createElement("canvas");
-		canvas.width = 800;
-		canvas.height = 800;
-		const ctx = canvas.getContext("2d")!;
-		const img = new Image();
-		img.onload = () => {
-			ctx.fillStyle = "#fff";
-			ctx.fillRect(0, 0, 800, 800);
-			ctx.drawImage(img, 40, 40, 720, 720);
-			const link = document.createElement("a");
-			link.download = `${shop.slug}-qr-code.png`;
-			link.href = canvas.toDataURL("image/png");
-			link.click();
-		};
-		img.src = "data:image/svg+xml;base64," + btoa(svgStr);
-	}
+	if (!loaded) return null;
 
 	return (
 		<div className="min-h-screen bg-[#FAF9F5] text-[#1A1A1A]">
@@ -62,50 +46,60 @@ export default function ShopSettingsPage() {
 				</Link>
 
 				<div className="text-center mb-10">
-					<h1 className="text-3xl font-bold font-serif-editorial text-[#1A1A1A]">
-						Your shop's QR code
-					</h1>
+					<h1 className="text-3xl font-bold font-serif-editorial text-[#1A1A1A]">Shop settings</h1>
 					<p className="text-sm text-gray-500 font-sans-clean mt-2">
-						Print this and place it at your counter. Customers scan
-						it to reach {shop.name}'s upload page.
+						Manage how your shop calculates order pricing.
 					</p>
 				</div>
 
-				<div className="bg-[#F2EFE9] border border-[#E5E2D9] rounded-3xl p-10 flex flex-col items-center space-y-6">
-					<div className="bg-white p-6 rounded-2xl border border-[#E5E2D9] shadow-sm">
-						<QRCodeSVG
-							id="shop-qr-svg"
-							value={shopUrl}
-							size={220}
-						/>
+				<div className="bg-white border border-[#E5E2D9] rounded-3xl p-8 space-y-5">
+					<div>
+						<h3 className="font-bold text-[#1A1A1A] text-lg font-serif-editorial">Pricing</h3>
+						<p className="text-xs text-gray-500 font-mono-code mt-1">
+							Price per physical sheet - used to calculate order totals
+						</p>
 					</div>
 
-					<div className="w-full space-y-3">
-						<div className="flex items-center gap-2">
-							<code className="flex-1 text-xs font-mono-code bg-white px-3 py-2.5 rounded-lg border border-[#E5E2D9] text-gray-700 truncate">
-								{shopUrl}
-							</code>
-							<button
-								onClick={handleCopy}
-								className="p-2.5 rounded-lg bg-white border border-[#E5E2D9] hover:bg-gray-50 transition shrink-0"
-								title="Copy link"
-							>
-								{copied ? (
-									<Check className="w-4 h-4 text-green-600" />
-								) : (
-									<Copy className="w-4 h-4 text-gray-600" />
-								)}
-							</button>
+					<div className="grid grid-cols-2 gap-4">
+						<div>
+							<label className="block text-xs font-mono-code text-gray-500 mb-1.5 uppercase">
+								Black &amp; White
+							</label>
+							<div className="relative">
+								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+								<input
+									type="number"
+									min={0}
+									step="0.5"
+									value={bwPrice}
+									onChange={(e) => setBwPrice(Number(e.target.value))}
+									className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
+								/>
+							</div>
 						</div>
-
-						<button
-							onClick={handleDownload}
-							className="w-full py-3 bg-[#1A1A1A] hover:bg-black text-white font-semibold rounded-xl transition text-sm flex items-center justify-center space-x-2"
-						>
-							<Download className="w-4 h-4" />
-							<span>Download QR code (PNG)</span>
-						</button>
+						<div>
+							<label className="block text-xs font-mono-code text-gray-500 mb-1.5 uppercase">Color</label>
+							<div className="relative">
+								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+								<input
+									type="number"
+									min={0}
+									step="0.5"
+									value={colorPrice}
+									onChange={(e) => setColorPrice(Number(e.target.value))}
+									className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
+								/>
+							</div>
+						</div>
 					</div>
+
+					<button
+						onClick={savePricing}
+						disabled={savingPricing}
+						className="w-full py-3 bg-[#1A1A1A] hover:bg-black text-white font-semibold rounded-xl transition text-sm disabled:opacity-50"
+					>
+						{savingPricing ? "Saving..." : pricingSaved ? "Saved ✓" : "Save Pricing"}
+					</button>
 				</div>
 			</div>
 		</div>
