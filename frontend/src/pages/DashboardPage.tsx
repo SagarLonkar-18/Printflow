@@ -6,7 +6,6 @@ import Navbar from "../components/Navbar";
 import OrderCard from "../components/OrderCard";
 import StatusTabs from "../components/StatusTabs";
 import DateTabs from "../components/DateTabs";
-import { Link } from "react-router-dom";
 
 interface OrderFile {
 	id: string;
