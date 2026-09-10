@@ -6,20 +6,7 @@ import Navbar from "../components/Navbar";
 import OrderCard from "../components/OrderCard";
 import StatusTabs from "../components/StatusTabs";
 import DateTabs from "../components/DateTabs";
-
-interface OrderFile {
-	id: string;
-	originalName: string;
-	copies: number;
-	colorMode: string;
-	status: string;
-}
-
-interface Order {
-	id: string;
-	createdAt: string;
-	files: OrderFile[];
-}
+import type { Order, OrderFile } from "../types/order";
 
 export default function DashboardPage() {
 	const token = useAuthStore((s) => s.token);
@@ -28,6 +15,23 @@ export default function DashboardPage() {
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState("all");
 	const [dateRange, setDateRange] = useState("today");
+	const [rates, setRates] = useState({
+		bwSinglePrice: 0,
+		bwDoublePrice: 0,
+		colorSinglePrice: 0,
+		colorDoublePrice: 0,
+	});
+
+	useEffect(() => {
+		api.get("/me/shop").then((res) => {
+			setRates({
+				bwSinglePrice: res.data.bwSinglePrice,
+				bwDoublePrice: res.data.bwDoublePrice,
+				colorSinglePrice: res.data.colorSinglePrice,
+				colorDoublePrice: res.data.colorDoublePrice,
+			});
+		});
+	}, []);
 
 	const dateRangeRef = useRef(dateRange);
 	useEffect(() => {
@@ -153,6 +157,7 @@ export default function DashboardPage() {
 								order={order}
 								onPrintFile={handlePrintFile}
 								onCompleteFile={handleCompleteFile}
+								{...rates}
 							/>
 						))}
 					</div>

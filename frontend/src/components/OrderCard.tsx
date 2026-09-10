@@ -1,23 +1,14 @@
 import { FileText, Printer, CheckCircle2 } from "lucide-react";
-
-interface OrderFile {
-	id: string;
-	originalName: string;
-	copies: number;
-	colorMode: string;
-	status: string;
-}
-
-interface Order {
-	id: string;
-	createdAt: string;
-	files: OrderFile[];
-}
+import type { Order, OrderFile } from "../types/order";
 
 interface OrderCardProps {
 	order: Order;
 	onPrintFile: (fileId: string) => void;
 	onCompleteFile: (fileId: string) => void;
+	bwSinglePrice: number;
+	bwDoublePrice: number;
+	colorSinglePrice: number;
+	colorDoublePrice: number;
 }
 
 const STATUS_CONFIG = {
@@ -46,25 +37,76 @@ function formatOrderTimestamp(iso: string) {
 	return `${dateStr} · ${time}`;
 }
 
-export default function OrderCard({ order, onPrintFile, onCompleteFile }: OrderCardProps) {
+function calculateFilePrice(
+	file: OrderFile,
+	rates: {
+		bwSinglePrice: number;
+		bwDoublePrice: number;
+		colorSinglePrice: number;
+		colorDoublePrice: number;
+	},
+) {
+	const sheetsPerCopy = file.doubleSided
+		? Math.ceil(file.pageCount / 2)
+		: file.pageCount;
+	const rate =
+		file.colorMode === "COLOR"
+			? file.doubleSided
+				? rates.colorDoublePrice
+				: rates.colorSinglePrice
+			: file.doubleSided
+				? rates.bwDoublePrice
+				: rates.bwSinglePrice;
+	return sheetsPerCopy * file.copies * rate;
+}
+
+export default function OrderCard({
+	order,
+	onPrintFile,
+	onCompleteFile,
+	bwSinglePrice,
+	bwDoublePrice,
+	colorSinglePrice,
+	colorDoublePrice,
+}: OrderCardProps) {
 	const hasPending = order.files.some((f) => f.status === "PENDING");
+	const rates = {
+		bwSinglePrice,
+		bwDoublePrice,
+		colorSinglePrice,
+		colorDoublePrice,
+	};
+	const orderTotal = order.files.reduce(
+		(sum, f) => sum + calculateFilePrice(f, rates),
+		0,
+	);
 
 	return (
 		<div
 			className={`bg-white p-5 rounded-2xl border transition shadow-sm ${
-				hasPending ? "border-[#D97706] ring-1 ring-[#D97706]/20" : "border-[#E5E2D9]"
+				hasPending
+					? "border-[#D97706] ring-1 ring-[#D97706]/20"
+					: "border-[#E5E2D9]"
 			}`}
 		>
 			<div className="flex items-center justify-between mb-3">
 				<p className="text-xs text-gray-500 font-mono-code">
-					Order &middot; {order.files.length} file{order.files.length !== 1 ? "s" : ""}
+					Order &middot; {order.files.length} file
+					{order.files.length !== 1 ? "s" : ""}
+					{orderTotal > 0 && <> &middot; ₹{orderTotal.toFixed(2)}</>}
 				</p>
-				<p className="text-xs text-gray-500 font-mono-code">{formatOrderTimestamp(order.createdAt)}</p>
+				<p className="text-xs text-gray-500 font-mono-code">
+					{formatOrderTimestamp(order.createdAt)}
+				</p>
 			</div>
 
 			<div className="space-y-3">
 				{order.files.map((file) => {
-					const status = STATUS_CONFIG[file.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PENDING;
+					const status =
+						STATUS_CONFIG[
+							file.status as keyof typeof STATUS_CONFIG
+						] ?? STATUS_CONFIG.PENDING;
+					const price = calculateFilePrice(file, rates);
 
 					return (
 						<div
@@ -76,17 +118,30 @@ export default function OrderCard({ order, onPrintFile, onCompleteFile }: OrderC
 									<FileText className="w-4 h-4 text-[#D97706]" />
 								</div>
 								<div className="min-w-0">
-									<p className="font-bold text-[#1A1A1A] text-sm font-sans-clean truncate">{file.originalName}</p>
-									<p className="text-xs text-gray-500 font-mono-code mt-0.5">
-										{file.copies}x &middot; {file.colorMode}
+									<p className="font-bold text-[#1A1A1A] text-sm font-sans-clean truncate">
+										{file.originalName}
+									</p>
+									<p className="text-xs text-gray-500 font-mono-code mt-1">
+										{file.pageCount} pg
+										{file.pageCount !== 1 ? "s" : ""}{" "}
+										&middot; {file.copies}x &middot;{" "}
+										{file.colorMode} &middot;{" "}
+										{file.doubleSided ? "Double" : "Single"}
+										{price > 0 && (
+											<> &middot; ₹{price.toFixed(2)}</>
+										)}
 									</p>
 								</div>
 							</div>
 
 							<div className="flex items-center space-x-3 shrink-0">
 								<div className="flex items-center space-x-1.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-full px-3 py-1.5">
-									<span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-									<span className="text-xs font-mono-code font-medium text-gray-600">{status.label}</span>
+									<span
+										className={`w-1.5 h-1.5 rounded-full ${status.dot}`}
+									/>
+									<span className="text-xs font-mono-code font-medium text-gray-600">
+										{status.label}
+									</span>
 								</div>
 
 								{file.status === "PENDING" && (

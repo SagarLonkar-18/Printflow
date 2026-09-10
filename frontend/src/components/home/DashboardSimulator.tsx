@@ -1,19 +1,6 @@
 import OrderCard from "../OrderCard";
 import StatusTabs from "../StatusTabs";
-
-interface OrderFile {
-	id: string;
-	originalName: string;
-	copies: number;
-	colorMode: string;
-	status: string;
-}
-
-interface Order {
-	id: string;
-	createdAt: string;
-	files: OrderFile[];
-}
+import type { Order } from "../../types/order";
 
 interface DashboardSimulatorProps {
 	orders: Order[];
@@ -79,7 +66,7 @@ export default function DashboardSimulator({
 				/>
 			</div>
 
-			<div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 mt-6">
+			<div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 				{filteredOrders.length === 0 ? (
 					<div className="text-center py-16 bg-[#F2EFE9] border border-[#E5E2D9] rounded-2xl">
 						<p className="text-gray-500 font-mono-code text-sm">
@@ -93,6 +80,10 @@ export default function DashboardSimulator({
 							order={order}
 							onPrintFile={onPrintFile}
 							onCompleteFile={onCompleteFile}
+							bwSinglePrice={2}
+							bwDoublePrice={1.5}
+							colorSinglePrice={10}
+							colorDoublePrice={8}
 						/>
 					))
 				)}
