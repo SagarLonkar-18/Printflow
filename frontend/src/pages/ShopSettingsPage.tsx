@@ -6,15 +6,21 @@ import Navbar from "../components/Navbar";
 
 export default function ShopSettingsPage() {
 	const [loaded, setLoaded] = useState(false);
-	const [bwPrice, setBwPrice] = useState(0);
-	const [colorPrice, setColorPrice] = useState(0);
+
+	const [bwSinglePrice, setBwSinglePrice] = useState(0);
+	const [bwDoublePrice, setBwDoublePrice] = useState(0);
+	const [colorSinglePrice, setColorSinglePrice] = useState(0);
+	const [colorDoublePrice, setColorDoublePrice] = useState(0);
+
 	const [savingPricing, setSavingPricing] = useState(false);
 	const [pricingSaved, setPricingSaved] = useState(false);
 
 	useEffect(() => {
 		api.get("/me/shop").then((res) => {
-			setBwPrice(res.data.bwPrice);
-			setColorPrice(res.data.colorPrice);
+			setBwSinglePrice(res.data.bwSinglePrice);
+			setBwDoublePrice(res.data.bwDoublePrice);
+			setColorSinglePrice(res.data.colorSinglePrice);
+			setColorDoublePrice(res.data.colorDoublePrice);
 			setLoaded(true);
 		});
 	}, []);
@@ -22,7 +28,12 @@ export default function ShopSettingsPage() {
 	async function savePricing() {
 		setSavingPricing(true);
 		try {
-			await api.patch("/me/shop/pricing", { bwPrice, colorPrice });
+			await api.patch("/me/shop/pricing", {
+				bwSinglePrice,
+				bwDoublePrice,
+				colorSinglePrice,
+				colorDoublePrice,
+			});
 			setPricingSaved(true);
 			setTimeout(() => setPricingSaved(false), 2000);
 		} finally {
@@ -52,43 +63,80 @@ export default function ShopSettingsPage() {
 					</p>
 				</div>
 
-				<div className="bg-white border border-[#E5E2D9] rounded-3xl p-8 space-y-5">
+				<div className="bg-white border border-[#E5E2D9] rounded-3xl p-8 space-y-6">
 					<div>
 						<h3 className="font-bold text-[#1A1A1A] text-lg font-serif-editorial">Pricing</h3>
 						<p className="text-xs text-gray-500 font-mono-code mt-1">
-							Price per physical sheet - used to calculate order totals
+							Price per physical sheet, by color mode and single/double-sided printing
 						</p>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="space-y-5">
 						<div>
-							<label className="block text-xs font-mono-code text-gray-500 mb-1.5 uppercase">
-								Black &amp; White
-							</label>
-							<div className="relative">
-								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
-								<input
-									type="number"
-									min={0}
-									step="0.5"
-									value={bwPrice}
-									onChange={(e) => setBwPrice(Number(e.target.value))}
-									className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
-								/>
+							<p className="text-xs font-mono-code text-gray-500 uppercase mb-2">Black &amp; White</p>
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<label className="block text-xs text-gray-400 mb-1.5">Single-sided</label>
+									<div className="relative">
+										<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+										<input
+											type="number"
+											min={0}
+											step="0.5"
+											value={bwSinglePrice}
+											onChange={(e) => setBwSinglePrice(Number(e.target.value))}
+											className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
+										/>
+									</div>
+								</div>
+								<div>
+									<label className="block text-xs text-gray-400 mb-1.5">Double-sided</label>
+									<div className="relative">
+										<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+										<input
+											type="number"
+											min={0}
+											step="0.5"
+											value={bwDoublePrice}
+											onChange={(e) => setBwDoublePrice(Number(e.target.value))}
+											className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
+										/>
+									</div>
+								</div>
 							</div>
 						</div>
+
 						<div>
-							<label className="block text-xs font-mono-code text-gray-500 mb-1.5 uppercase">Color</label>
-							<div className="relative">
-								<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
-								<input
-									type="number"
-									min={0}
-									step="0.5"
-									value={colorPrice}
-									onChange={(e) => setColorPrice(Number(e.target.value))}
-									className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
-								/>
+							<p className="text-xs font-mono-code text-gray-500 uppercase mb-2">Color</p>
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<label className="block text-xs text-gray-400 mb-1.5">Single-sided</label>
+									<div className="relative">
+										<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+										<input
+											type="number"
+											min={0}
+											step="0.5"
+											value={colorSinglePrice}
+											onChange={(e) => setColorSinglePrice(Number(e.target.value))}
+											className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
+										/>
+									</div>
+								</div>
+								<div>
+									<label className="block text-xs text-gray-400 mb-1.5">Double-sided</label>
+									<div className="relative">
+										<span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+										<input
+											type="number"
+											min={0}
+											step="0.5"
+											value={colorDoublePrice}
+											onChange={(e) => setColorDoublePrice(Number(e.target.value))}
+											className="w-full pl-7 pr-3 py-2.5 bg-[#FAF9F5] border border-[#E5E2D9] rounded-xl text-sm"
+										/>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -98,7 +146,7 @@ export default function ShopSettingsPage() {
 						disabled={savingPricing}
 						className="w-full py-3 bg-[#1A1A1A] hover:bg-black text-white font-semibold rounded-xl transition text-sm disabled:opacity-50"
 					>
-						{savingPricing ? "Saving..." : pricingSaved ? "Saved ✓" : "Save Pricing"}
+						{savingPricing ? "Saving..." : pricingSaved ? "Saved" : "Save Pricing"}
 					</button>
 				</div>
 			</div>
