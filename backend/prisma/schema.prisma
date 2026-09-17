@@ -44,6 +44,7 @@ model OrderFile {
   doubleSided  Boolean  @default(false)
   copies       Int      @default(1)
   colorMode    String   @default("BW")
+  price        Float    @default(0)
   status       String   @default("PENDING")
   createdAt    DateTime @default(now())
 }

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "OrderFile" ADD COLUMN     "price" DOUBLE PRECISION NOT NULL DEFAULT 0;
