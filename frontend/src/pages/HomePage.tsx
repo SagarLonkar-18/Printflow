@@ -22,6 +22,7 @@ const MOCK_QUEUE: Order[] = [
 				status: "PENDING",
 				pageCount: 12,
 				doubleSided: false,
+				price: 72,
 			},
 		],
 	},
@@ -37,6 +38,7 @@ const MOCK_QUEUE: Order[] = [
 				status: "PRINTING",
 				pageCount: 4,
 				doubleSided: true,
+				price: 20,
 			},
 		],
 	},
@@ -52,6 +54,7 @@ const MOCK_QUEUE: Order[] = [
 				status: "COMPLETED",
 				pageCount: 8,
 				doubleSided: false,
+				price: 32,
 			},
 		],
 	},
@@ -75,6 +78,7 @@ export default function HomePage() {
 				status: "PENDING",
 				pageCount: 1,
 				doubleSided: false,
+				price: f.colorMode === "COLOR" ? 10 * f.copies : 2 * f.copies,
 			})),
 		};
 		setQueueOrders([newOrder, ...queueOrders]);

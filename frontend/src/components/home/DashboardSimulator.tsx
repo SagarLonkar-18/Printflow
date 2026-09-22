@@ -80,10 +80,6 @@ export default function DashboardSimulator({
 							order={order}
 							onPrintFile={onPrintFile}
 							onCompleteFile={onCompleteFile}
-							bwSinglePrice={2}
-							bwDoublePrice={1.5}
-							colorSinglePrice={10}
-							colorDoublePrice={8}
 						/>
 					))
 				)}
