@@ -6,6 +6,7 @@ export interface OrderFile {
 	status: string;
 	pageCount: number;
 	doubleSided: boolean;
+	price: number;
 }
 
 export interface Order {
