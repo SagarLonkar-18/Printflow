@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ShopQRPage from "./pages/ShopQRPage";
 import ShopSettingsPage from "./pages/ShopSettingsPage";
 import ScrollToHash from "./components/ScrollToHash";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
 	return (
@@ -47,6 +48,7 @@ function App() {
 						</ProtectedRoute>
 					}
 				/>
+				<Route path="/dashboard/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
 			</Routes>
 		</BrowserRouter>
 	);
