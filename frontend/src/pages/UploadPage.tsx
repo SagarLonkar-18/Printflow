@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FileText, Upload, Loader2, X } from "lucide-react";
 import { api } from "../lib/api";
-import { getPdfPageCount } from "../lib/pdfUtils";
+import { getPageCount } from "../lib/pdfUtils";
 
 interface ShopInfo {
 	id: string;
@@ -50,7 +50,7 @@ export default function UploadPage() {
 		// added file. Never blocks the UI - the file shows up immediately,
 		// and each entry's pageCount fills in independently once ready.
 		newEntries.forEach(async (entry) => {
-			const count = await getPdfPageCount(entry.file);
+			const count = await getPageCount(entry.file);
 			setEntries((prev) =>
 				prev.map((e) =>
 					e.file === entry.file ? { ...e, pageCount: count } : e,
@@ -173,7 +173,7 @@ export default function UploadPage() {
 					<label className="block border-2 border-dashed border-[#D97706]/40 rounded-2xl p-6 text-center bg-white/50 hover:bg-white transition cursor-pointer relative">
 						<input
 							type="file"
-							accept="application/pdf"
+							accept="application/pdf,image/jpeg,image/png"
 							multiple
 							className="absolute inset-0 opacity-0 cursor-pointer"
 							onChange={(e) => addFiles(e.target.files)}
@@ -181,7 +181,7 @@ export default function UploadPage() {
 
 						<Upload className="w-7 h-7 text-[#D97706] mx-auto mb-2" />
 						<p className="text-sm font-medium text-[#1A1A1A]">
-							Tap to add PDF(s)
+							Tap to add files
 						</p>
 						<p className="text-xs text-gray-500 mt-1 font-mono-code">
 							You can select multiple files
@@ -204,8 +204,11 @@ export default function UploadPage() {
 										</p>
 										<p className="text-xs text-gray-400 font-mono-code mt-0.5">
 											{entry.pageCount === null
-												? "Calculating pages…"
-												: `${entry.pageCount} pages`}
+												? "Calculating…"
+												: entry.file.type ===
+													  "application/pdf"
+													? `${entry.pageCount} page${entry.pageCount !== 1 ? "s" : ""}`
+													: "Image"}
 										</p>
 									</div>
 								</div>
