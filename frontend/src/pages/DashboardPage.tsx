@@ -60,9 +60,43 @@ export default function DashboardPage() {
 		);
 	}
 
+	function isImageFile(originalName: string): boolean {
+		return /\.(jpe?g|png)$/i.test(originalName);
+	}
+
+	function openImageForPrint(url: string) {
+		const printWindow = window.open("", "_blank");
+		if (!printWindow) return;
+
+		printWindow.document.write(`
+		<html>
+			<head><title>Print</title></head>
+			<body style="margin:0;display:flex;justify-content:center;">
+				<img src="${url}" style="max-width:100%;height:auto;" />
+			</body>
+		</html>
+	`);
+		printWindow.document.close();
+
+		const img = printWindow.document.querySelector("img");
+		if (img) {
+			img.onload = () => {
+				printWindow.print();
+				printWindow.onafterprint = () => printWindow.close();
+			};
+		}
+	}
+
 	async function handlePrintFile(fileId: string) {
 		const res = await api.get(`/me/files/${fileId}/download-url`);
-		window.open(res.data.downloadUrl, "_blank");
+		const file = orders
+			.flatMap((o) => o.files)
+			.find((f) => f.id === fileId);
+		if (file && isImageFile(file.originalName)) {
+			openImageForPrint(res.data.downloadUrl);
+		} else {
+			window.open(res.data.downloadUrl, "_blank");
+		}
 		await api.patch(`/me/files/${fileId}/status`, { status: "PRINTING" });
 		updateFileInState(fileId, { status: "PRINTING" });
 	}
