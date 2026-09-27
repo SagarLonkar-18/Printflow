@@ -106,7 +106,7 @@ export async function presignUpload(req: Request, res: Response) {
 		if (e.message === "UNSUPPORTED_FILE_TYPE") {
 			return res
 				.status(400)
-				.json({ error: "Only PDF files are supported" });
+				.json({ error: "Only PDF, JPG, and PNG files are supported" });
 		}
 		throw e;
 	}

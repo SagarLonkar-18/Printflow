@@ -10,7 +10,7 @@ const s3 = new S3Client({
 	},
 });
 
-const ALLOWED_MIME_TYPES = new Set(["application/pdf"]);
+const ALLOWED_MIME_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
 
 export async function createPresignedUpload(
 	shopSlug: string,
