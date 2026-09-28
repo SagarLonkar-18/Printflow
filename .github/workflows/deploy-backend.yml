@@ -17,7 +17,9 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
+            set -e
             cd ~/Printflow
             git pull origin main
             docker compose -f docker-compose.prod.yml up -d --build api
