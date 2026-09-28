@@ -29,7 +29,9 @@ export async function createOrder(req: Request, res: Response) {
 
 	const parsed = createOrderSchema.safeParse(req.body);
 	if (!parsed.success) {
-		return res.status(400).json({ error: parsed.error.flatten().fieldErrors });
+		return res
+			.status(400)
+			.json({ error: parsed.error.flatten().fieldErrors });
 	}
 
 	const shop = await prisma.shop.findUnique({ where: { slug } });
@@ -37,8 +39,14 @@ export async function createOrder(req: Request, res: Response) {
 		return res.status(404).json({ error: "Shop not found" });
 	}
 
-	function calculatePrice(pageCount: number, doubleSided: boolean, colorMode: string): number {
-		const sheetsPerCopy = doubleSided ? Math.ceil(pageCount / 2) : pageCount;
+	const calculatePrice = (
+		pageCount: number,
+		doubleSided: boolean,
+		colorMode: string,
+	): number => {
+		const sheetsPerCopy = doubleSided
+			? Math.ceil(pageCount / 2)
+			: pageCount;
 		const rate =
 			colorMode === "COLOR"
 				? doubleSided
@@ -48,7 +56,7 @@ export async function createOrder(req: Request, res: Response) {
 					? shop.bwDoublePrice
 					: shop.bwSinglePrice;
 		return sheetsPerCopy * rate;
-	}
+	};
 
 	const order = await prisma.order.create({
 		data: {
@@ -63,11 +71,19 @@ export async function createOrder(req: Request, res: Response) {
 					return {
 						fileKey: f.fileKey,
 						originalName: f.originalName,
-						...(f.pageCount !== undefined ? { pageCount: f.pageCount } : {}),
-						...(f.doubleSided !== undefined ? { doubleSided: f.doubleSided } : {}),
+						...(f.pageCount !== undefined
+							? { pageCount: f.pageCount }
+							: {}),
+						...(f.doubleSided !== undefined
+							? { doubleSided: f.doubleSided }
+							: {}),
 						...(f.copies !== undefined ? { copies: f.copies } : {}),
-						...(f.colorMode !== undefined ? { colorMode: f.colorMode } : {}),
-						price: calculatePrice(pageCount, doubleSided, colorMode) * copies,
+						...(f.colorMode !== undefined
+							? { colorMode: f.colorMode }
+							: {}),
+						price:
+							calculatePrice(pageCount, doubleSided, colorMode) *
+							copies,
 					};
 				}),
 			},
