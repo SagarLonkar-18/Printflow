@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/auth.store";
 // import logo from "/printflow-logo-with-bg.png";
-import logo from "/printflow_logo_light.png";
+import logo from "/printflow_logo_light.webp";
 import { api } from "../lib/api";
 
 export default function Navbar() {

@@ -1,4 +1,4 @@
-import logo from "/printflow_logo_dark.png";
+import logo from "/printflow_logo_dark.webp";
 import { Link } from "react-router-dom";
 
 export default function Footer() {

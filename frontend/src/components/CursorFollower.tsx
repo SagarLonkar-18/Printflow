@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import documentIcon from "/document-icon.png";
+import documentIcon from "/document-icon.webp";
 
 export default function CursorFollower() {
 	const iconRef = useRef<HTMLImageElement | null>(null);

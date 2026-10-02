@@ -14,7 +14,7 @@ export default function HeroSection() {
 			{/* LEFT — PDF image */}
 			<div className="pointer-events-none absolute left-[5%] top-[16%] hidden xl:block hero-float-left">
 					<img
-						src="/pdf-icon.png"
+						src="/pdf-icon.webp"
 						alt=""
 						className="w-[150px] h-auto drop-shadow-[0_18px_32px_rgba(0,0,0,0.16)]"
 					/>
@@ -23,7 +23,7 @@ export default function HeroSection() {
 			{/* RIGHT — Receipt image */}
 			<div className="pointer-events-none absolute right-[1%] top-[18%] hidden xl:block hero-float-right">
 					<img
-						src="/receipt-icon.png"
+						src="/receipt-icon.webp"
 						alt=""
 						className="w-[350px] h-auto drop-shadow-[0_20px_38px_rgba(0,0,0,0.16)]"
 					/>

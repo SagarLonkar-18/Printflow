@@ -77,7 +77,7 @@ export default function CustomerSimulator({
 				<div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
 					<div className="w-56 h-56 bg-white p-3 rounded-2xl shadow-md border border-[#E5E2D9] flex items-center justify-center">
 						<img
-							src="/demo-qr.png"
+							src="/demo-qr.webp"
 							alt="Demo shop QR code"
 							className="w-full h-full object-contain"
 						/>
