@@ -6,27 +6,30 @@ export default function HeroSection() {
 	const token = useAuthStore((s) => s.token);
 
 	return (
-		<section id="home" className="relative overflow-hidden pt-14 sm:pt-20 pb-4 scroll-mt-20">
+		<section
+			id="home"
+			className="relative overflow-hidden pt-14 sm:pt-20 pb-4 scroll-mt-20"
+		>
 			{/* =====================================================
 				DECORATIVE ELEMENTS — desktop only
 			===================================================== */}
 
 			{/* LEFT — PDF image */}
 			<div className="pointer-events-none absolute left-[5%] top-[16%] hidden xl:block hero-float-left">
-					<img
-						src="/pdf-icon.webp"
-						alt=""
-						className="w-[150px] h-auto drop-shadow-[0_18px_32px_rgba(0,0,0,0.16)]"
-					/>
+				<img
+					src="/pdf-icon.webp"
+					alt=""
+					className="w-[150px] h-auto drop-shadow-[0_18px_32px_rgba(0,0,0,0.16)]"
+				/>
 			</div>
 
 			{/* RIGHT — Receipt image */}
 			<div className="pointer-events-none absolute right-[1%] top-[18%] hidden xl:block hero-float-right">
-					<img
-						src="/receipt-icon.webp"
-						alt=""
-						className="w-[350px] h-auto drop-shadow-[0_20px_38px_rgba(0,0,0,0.16)]"
-					/>
+				<img
+					src="/receipt-icon.webp"
+					alt=""
+					className="w-[350px] h-auto drop-shadow-[0_20px_38px_rgba(0,0,0,0.16)]"
+				/>
 			</div>
 
 			{/* =====================================================
@@ -65,7 +68,7 @@ export default function HeroSection() {
 				FULL WIDTH PRODUCT VIDEO
 			===================================================== */}
 
-			<div className="relative z-10 mt-4 w-screen left-1/2 right-1/2 -mx-[50vw]">
+			<div className="relative z-10 mt-10 w-screen left-1/2 right-1/2 -mx-[50vw]">
 				<div className="relative w-full">
 					<video
 						className="w-full h-auto block"
@@ -73,18 +76,17 @@ export default function HeroSection() {
 						muted
 						loop
 						playsInline
-						poster="/product-preview-poster.jpg"
 					>
-						<source src="/product-demo.mov" type="video/mp4" />
+						<source src="/brag.mp4" type="video/mp4" />
 					</video>
 
 					{/* Wavy cloud - top */}
 					<svg
 						className="absolute -top-px left-0 w-[100%] -ml-[0.5%] pointer-events-none"
 						style={{
-							height: "10vw",
-							minHeight: "60px",
-							maxHeight: "140px",
+							height: "3.5vw",
+							minHeight: "28px",
+							maxHeight: "55px",
 						}}
 						viewBox="0 0 1440 160"
 						preserveAspectRatio="none"
@@ -99,9 +101,9 @@ export default function HeroSection() {
 					<svg
 						className="absolute -bottom-px left-0 w-[100%] -ml-[0.5%] pointer-events-none"
 						style={{
-							height: "12vw",
-							minHeight: "70px",
-							maxHeight: "160px",
+							height: "5vw",
+							minHeight: "30px",
+							maxHeight: "65px",
 						}}
 						viewBox="0 0 1440 160"
 						preserveAspectRatio="none"

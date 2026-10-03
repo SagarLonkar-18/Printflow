@@ -36,3 +36,5 @@ lerna-debug.log*
 
 # Claude
 .claude/
+brag-output/
+brag-output-*/
